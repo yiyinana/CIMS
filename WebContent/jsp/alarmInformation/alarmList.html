@@ -1,0 +1,52 @@
+<div class="place">
+	<span>位置：</span>
+	<ul class="placeul">
+		<li><a href="/CIMS/login/toIndex.do">首页</a></li>
+		<li>报警列表</li>
+	</ul>
+</div>
+
+<div class="rightinfo">
+
+	<div class="tools">
+
+		<form class="toolbar">
+			<input name="" type="text" class="dfinput" id="cName"
+				ng-model="alarmContent" placeholder="内容关键字" /> <input class="btn" type="submit"
+				value="查询" ng-click="selectAlarmByContent()">
+		</form>
+	</div>
+	<table class="tablelist">
+		<thead>
+			<tr>
+				<th>编号</th>
+				<th>内容</th>
+				<th>时间</th>
+				<th>次数</th>
+				<th>所属合同</th>
+				<!-- <th>操作</th> -->
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="alarm in alarms">
+				<td>{{$index + 1 }}</td>
+				<td>{{alarm.alar_content}}</td>
+				<td>{{alarm.alar_time.time | dateType}}</td>
+				<td>{{alarm.num}}</td>
+				<td><a class="underline"
+					href="/CIMS/contract/toContractPage.do#contractInfo" ng-click="getContId(alarm.contract.cont_id)">{{alarm.contract.cont_name}}</a></td>
+				<!-- <td><a href="#alarmDetail" class="tablelink"
+					ng-click="getAlarmId(alarm.alar_id)">详情</a></td> -->
+			</tr>
+		</tbody>
+	</table>
+
+	<div class="tcdPageCode">页码容器</div>
+</div>
+
+<script type="text/javascript">
+	$('.tablelist tbody tr:odd').addClass('odd');
+</script>
+
+
+
