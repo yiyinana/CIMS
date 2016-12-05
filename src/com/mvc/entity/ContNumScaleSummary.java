@@ -9,7 +9,7 @@ package com.mvc.entity;
  * @author zjn
  * @date 2016年12月2日
  */
-public class ContNumAcaleSummary {
+public class ContNumScaleSummary {
 	private String order_num;// 序号
 	private String province;// 区域
 	private String guangfu;// 光伏类
