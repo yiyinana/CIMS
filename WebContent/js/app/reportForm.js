@@ -595,6 +595,20 @@ app
 								}).success(function(data) {
 									reportForm.payPlanForms = data.list;// payPlanForms查询出来的列表（PaymentPlanForm）
 									paymentPageTurn(data.totalPage, 1);
+									reportForm.payPlanForms = data.list;// payPlanForms查询出来的列表（PaymentPlanForm）
+									reportForm.remo_totalmoney = data.remo_totalmoney;//累计到款总金额
+									reportForm.invo_totalmoney = data.invo_totalmoney;//累计开发票总金额
+									reportForm.invo_not_totalmoney = data.invo_not_totalmoney;//累计未开发票总金额
+									reportForm.totalRow = data.totalRow;//总记录
+									reportForm.totalMoney = data.totalMoney;//合同总金额
+									setTimeout(
+											'mergeCell("paymentSheet",0,1)',
+											"0");
+									if (data.list.length) {
+										reportForm.listIsShow = false;
+									} else {
+										reportForm.listIsShow = true;
+									}
 								});
 							};
 							// lwt换页查找函数
@@ -604,6 +618,19 @@ app
 									page : p
 								}).success(function(data) {
 									reportForm.payPlanForms = data.list;// payPlanForms查询出来的列表（PaymentPlanForm）
+									reportForm.remo_totalmoney = data.remo_totalmoney;//累计到款总金额
+									reportForm.invo_totalmoney = data.invo_totalmoney;//累计开发票总金额
+									reportForm.invo_not_totalmoney = data.invo_not_totalmoney;//累计未开发票总金额
+									reportForm.totalRow = data.totalRow;//总记录
+									reportForm.totalMoney = data.totalMoney;//合同总金额
+									setTimeout(
+											'mergeCell("paymentSheet",0,1)',
+											"0");
+									if (data.list.length) {
+										reportForm.listIsShow = false;
+									} else {
+										reportForm.listIsShow = true;
+									}
 								});
 							}
 							// lwt换页
@@ -707,6 +734,14 @@ app
 									reportForm.listIsShow = false;
 									reportForm.totalMoney = 0;
 									reportForm.totalRow = 0;
+								}else if($location.path().indexOf(
+								'/paymentPlanList') == 0){
+									reportForm.listIsShow = false;
+									reportForm.remo_totalmoney = 0;//累计到款总金额
+									reportForm.invo_totalmoney = 0;//累计开发票总金额
+									reportForm.invo_not_totalmoney = 0;//累计未开发票总金额
+									reportForm.totalRow =0;//总记录
+									reportForm.totalMoney = 0;//合同总金额
 								}
 							}
 							initData();
