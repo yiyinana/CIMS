@@ -22,12 +22,14 @@ import com.mvc.entity.SummarySheet;
 import com.base.constants.ReportFormConstants;
 import com.base.constants.SessionKeyConstants;
 import com.mvc.entity.ComoCompareRemo;
+import com.mvc.entity.Contract;
 import com.mvc.entity.NewComoAnalyse;
 import com.mvc.entity.NewRemoAnalyse;
 import com.mvc.entity.NoBackContForm;
 import com.mvc.entity.PaymentPlanListForm;
 import com.mvc.service.ContractService;
 import com.mvc.service.ReportFormService;
+import com.utils.DoubleFloatUtil;
 import com.utils.FileHelper;
 import com.utils.Pager;
 import com.utils.StringUtil;
@@ -428,17 +430,35 @@ public class ReportFormController {
 	 */
 	@RequestMapping("/selectPaymentPlanList.do")
 	public @ResponseBody String selectPaymentPlanList(HttpServletRequest request) {
+		String totalMoney;	
+		String remo_totalmoney;
+		String invo_totalmoney;
+		String invo_not_totalmoney;
+
 		JSONObject jsonObject = JSONObject.fromObject(request.getParameter("limit"));
 		Integer page = Integer.parseInt(request.getParameter("page"));// 分页
 		Map<String, Object> map = reportFormService.JsonObjToMap(jsonObject);
 		Pager pager = reportFormService.pagerTotal_payment(map, page);
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		List<PaymentPlanListForm> list = reportFormService.findPaymentPlanList(map, pager, path);
-
+	
+		List<Object> list0=reportFormService.findTotalMoney(map);		
+		Object[] objOne1 = (Object[]) list0.get(0);		
+		totalMoney=objOne1[0].toString();
+		remo_totalmoney=objOne1[1].toString();
+		invo_totalmoney=objOne1[2].toString();
+		invo_not_totalmoney=DoubleFloatUtil.sub(totalMoney, invo_totalmoney);
+		
 		jsonObject = new JSONObject();
 		jsonObject.put("list", list);
+		jsonObject.put("totalMoney", totalMoney);
+		jsonObject.put("remo_totalmoney", remo_totalmoney);//累计到款总金额
+		jsonObject.put("invo_totalmoney", invo_totalmoney);//累计开发票总金额
+		jsonObject.put("invo_not_totalmoney", invo_not_totalmoney);//累计未开发票总金额				
+		jsonObject.put("totalRow", pager.getTotalRow());//总记录
 		jsonObject.put("totalPage", pager.getTotalPage());
 		return jsonObject.toString();
+
 
 	}
 
