@@ -47,6 +47,8 @@ public class Contract implements Serializable {
 	private Integer cont_initiation;// 是否立项，0:未立项，1:已立项(默认已立项)
 	private Float install_capacity;// 装机容量（MV）
 	private Integer cont_isback;// 新增： 是否返回合同（归档）..............................
+	private Float go_install;// 投产装机
+	private Float go_electric;// 投产发电
 
 	// 业主信息相关
 	private String cont_client;// 业主公司名称
@@ -620,6 +622,24 @@ public class Contract implements Serializable {
 
 	public void setCont_cemail2(String cont_cemail2) {
 		this.cont_cemail2 = cont_cemail2;
+	}
+
+	@Column(columnDefinition = "float(10,2)  default '0.00'")
+	public Float getGo_install() {
+		return go_install;
+	}
+
+	public void setGo_install(Float go_install) {
+		this.go_install = go_install;
+	}
+
+	@Column(columnDefinition = "float(10,2)  default '0.00'")
+	public Float getGo_electric() {
+		return go_electric;
+	}
+
+	public void setGo_electric(Float go_electric) {
+		this.go_electric = go_electric;
 	}
 
 }
