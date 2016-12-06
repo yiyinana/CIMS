@@ -52,8 +52,6 @@
 				</ul>
 			</form>
 		</div>
-		<a href="/CIMS/reportForm/selectContNumSum.do">合同数量汇总</a> <a
-			href="/CIMS/reportForm/exportContNumSum.do">导出合同数量汇总</a>
 	</div>
 	<div class="loginbm">西北勘测设计院光伏电设计分院</div>
 	<script type="text/javascript"

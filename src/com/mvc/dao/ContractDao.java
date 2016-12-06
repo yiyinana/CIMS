@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.mvc.entity.Contract;
-import com.mvc.entity.PaymentPlanListForm;
 import com.utils.Pager;
 
 public interface ContractDao {
@@ -85,8 +84,8 @@ public interface ContractDao {
 
 	// 查询报表总条数
 	Long countTotal_payment(Map<String, Object> map);
-	
-	//查询合同总金额
+
+	// 查询合同总金额
 	List<Object> findTotalMoney(Map<String, Object> map);
 
 }
