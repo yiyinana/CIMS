@@ -51,6 +51,15 @@ public interface ContractDao {
 	// 查询未返回合同统计表总条数
 	Long countTotalNoBack(Map<String, Object> map);
 
+	// 动态获取Sql语句（年份sum语句）
+	String findYearsSql();
+
+	// 动态获取所有年份
+	List<Object> findYears();
+
+	// 统计汇总表（合同数量）
+	List<Object> findContNumSum(List<String> sqllist, String yearsStr);
+
 	/**************** 张姣娜 ********************/
 	// 根据日期获取合同额到款对比表
 	List<Object> findByOneDate(String date);

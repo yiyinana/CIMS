@@ -198,6 +198,38 @@ public class ReportFormController {
 		return jsonObject.toString();
 	}
 
+	/**
+	 * 查询统计汇总表（合同数量）
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/selectContNumSum.do")
+	public @ResponseBody String selectContNumSum(HttpServletRequest request) {
+		List<List<String>> list = reportFormService.findContNumSum();
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("list", list);
+		System.out.println(jsonObject.toString());
+		return jsonObject.toString();
+	}
+
+	/**
+	 * 导出统计汇总表（合同数量）
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/exportContNumSum.do")
+	public ResponseEntity<byte[]> exportContNumSum(HttpServletRequest request) {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		// map.put("handler", handler);
+
+		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
+		ResponseEntity<byte[]> byteArr = reportFormService.exportContNumSum(map, path);
+		return byteArr;
+	}
+
 	/*
 	 * ***********************************张姣娜报表开始*******************************
 	 */
