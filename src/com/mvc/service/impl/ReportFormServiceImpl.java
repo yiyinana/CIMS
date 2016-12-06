@@ -30,6 +30,7 @@ import com.mvc.entity.PaymentPlanListForm;
 import com.mvc.entity.ProjectStatisticForm;
 import com.mvc.entity.SummarySheet;
 import com.mvc.service.ReportFormService;
+import com.utils.CollectionUtil;
 import com.utils.DoubleFloatUtil;
 import com.utils.ExcelHelper;
 import com.utils.FileHelper;
@@ -435,6 +436,168 @@ public class ReportFormServiceImpl implements ReportFormService {
 			str = str.substring(0, str.length() - 1);// 去掉最后一个逗号
 		}
 		return str;
+	}
+
+	// 查询统计汇总表（合同数量）
+	@Override
+	public List<List<String>> findContNumSum() {
+		String yearsSql = contractDao.findYearsSql();
+		List<String> sqllist = new ArrayList<String>();// 处理动态年份sql语句
+		String sqlStr;
+		for (int i = 0; i < 4; i++) {
+			sqlStr = dealStr(yearsSql, i);
+			sqllist.add(sqlStr);
+		}
+
+		List<Object> yearlist = contractDao.findYears();// 处理动态表头（年份）
+		String yearsStr;
+		StringBuilder strb = new StringBuilder();
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < yearlist.size(); j++) {
+				strb.append(yearlist.get(j) + "_" + i + ",");
+			}
+		}
+		yearsStr = strb.toString();
+		yearsStr = yearsStr.substring(0, yearsStr.length() - 1);
+
+		List<Object> listSource = contractDao.findContNumSum(sqllist, yearsStr);
+		List<List<String>> list = dealList(listSource, yearsStr);
+
+		return list;
+	}
+
+	// 导出统计汇总表（合同数量）
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public ResponseEntity<byte[]> exportContNumSum(Map<String, Object> map, String path) {
+		ResponseEntity<byte[]> byteArr = null;
+
+		try {
+			ExcelHelper<List<String>> ex = new ExcelHelper<List<String>>();
+			String fileName = "光伏项目情况统计表（" + 2008 + "-" + 2016 + "年）（含汇总表）.xlsx";// 2007版
+			path = FileHelper.transPath(fileName, path);// 解析后的上传路径
+			OutputStream out = new FileOutputStream(path);
+
+			List<List<String>> listGoal = findContNumSum();
+
+			String title = 2008 + "-" + 2016 + "年光伏自营项目情况统计汇总表（合同数量）";
+			ex.export2007Excel(title, null, (Collection) listGoal, out, "yyyy-MM-dd", -1);
+
+			out.close();
+			byteArr = FileHelper.downloadFile(fileName, path);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return byteArr;
+	}
+
+	/**
+	 * 处理动态年份sql
+	 * 
+	 * @param yearsSql
+	 * @param cont_type
+	 * @return
+	 */
+	private String dealStr(String yearsSql, Integer cont_type) {
+		int index = yearsSql.indexOf("as ");
+		if (index > 0) {
+			String subStr1 = yearsSql.substring(index, index + 8);// 截取年份字符串（字段别名）
+			String subStr2 = yearsSql.substring(index + 3, index + 8) + "_" + cont_type;// 别名后加上类型（区分是哪个表头）
+			yearsSql = yearsSql.replace(subStr1, subStr2);
+			yearsSql = dealStr(yearsSql, cont_type);// 递归处理
+		}
+		return yearsSql;
+	}
+
+	/**
+	 * list去空列，求和
+	 * 
+	 * @param list
+	 * @param yearsStr
+	 * @return
+	 */
+	private List<List<String>> dealList(List<Object> list, String yearsStr) {
+		List<List<String>> listGoal = new ArrayList<List<String>>();
+		if (list != null) {
+			String[] arr = yearsStr.split(",");
+			int len = arr.length + 1;// 加省份（不包括合计列）
+			Object[] title = new Object[len + 1];// 加合计
+			title[0] = "区域";
+			title[len] = "合计";
+			for (int i = 1; i < len; i++) {
+				title[i] = arr[i - 1];
+			}
+
+			Integer[] col = CollectionUtil.initInt(len + 1);// 初始化一个全为0的数组，长度为动态年份的个数，记录为空或0的列
+			col[0] = col[len] = 1;// 省份、合计列为1
+			Iterator<Object> it = list.iterator();
+			while (it.hasNext()) {
+				Object[] obj = (Object[]) it.next();
+				for (int i = 0; i < len; i++) {
+					if (col[i] == 0 && !StringUtil.isNullOrZero(obj[i])) {
+						col[i] = 1;
+						continue;
+					}
+				}
+			}
+
+			List<String> biaoTou = new ArrayList<String>();// 表头（大类别）
+			List<String> titleList = new ArrayList<String>();// 表头去掉空列（null或者为0）
+			for (int i = 0; i < len + 1; i++) {
+				if (col[i] == 1) {
+					if (i == 0 || i == len) {// 省份、合计
+						String str = title[i].toString();
+						titleList.add(str);
+						biaoTou.add(str);
+					} else {
+						String str = title[i].toString();
+						titleList.add(str.substring(0, 4));
+						Integer cont_type = Integer.valueOf(str.substring(5, 6));
+						biaoTou.add(ContractType.intToStr(cont_type));
+					}
+				}
+			}
+			listGoal.add(biaoTou);
+			listGoal.add(titleList);
+			int colNum = titleList.size();// 去掉空列后的列数
+
+			List<String> li = null;
+			for (int i = 0; i < list.size(); i++) {// 去掉空列（null或者为0）,行求和
+				Object[] obj = (Object[]) list.get(i);
+				li = new ArrayList<String>();
+				String str = null;
+				int rowSum = 0;
+				for (int j = 0; j < len; j++) {
+					if (col[j] == 1) {
+						str = (obj[j] == null) ? null : obj[j].toString();
+						if (j > 0) {
+							rowSum += (str == null) ? 0 : Integer.parseInt(str);
+						}
+						li.add(str);
+					}
+				}
+				li.add(String.valueOf(rowSum));
+				listGoal.add(li);
+			}
+
+			li = null;
+			List<String> liSum = new ArrayList<String>();// 列合计
+			liSum.add("合计");
+			for (int i = 1; i < colNum; i++) {// 列求和
+				int colSum = 0;
+				for (int j = 2; j < listGoal.size(); j++) {
+					li = listGoal.get(j);
+					colSum += (li.get(i) == null) ? 0 : Integer.parseInt(li.get(i));
+				}
+				liSum.add(String.valueOf(colSum));
+			}
+			listGoal.add(liSum);
+
+		}
+		return listGoal;
 	}
 
 	/************************************************ 张姣娜 **********************************/
@@ -968,17 +1131,17 @@ public class ReportFormServiceImpl implements ReportFormService {
 
 		return pager;
 	}
-	//查询合同总金额,累计总金额,已开发票总金额,未开发票总金额
+
+	// 查询合同总金额,累计总金额,已开发票总金额,未开发票总金额
 	@Override
 	public List<Object> findTotalMoney(Map<String, Object> map) {
 		List<PaymentPlanListForm> listGoal = new ArrayList<PaymentPlanListForm>();
-		List<Object> list=contractDao.findTotalMoney(map);
-		/*for(int i = 0;i<list.size();i++){
-			list.get(i).
-			System.out.println(list.get(i).getCont_money());	
-			}*/
-		
-		
+		List<Object> list = contractDao.findTotalMoney(map);
+		/*
+		 * for(int i = 0;i<list.size();i++){ list.get(i).
+		 * System.out.println(list.get(i).getCont_money()); }
+		 */
+
 		return list;
 	}
 
