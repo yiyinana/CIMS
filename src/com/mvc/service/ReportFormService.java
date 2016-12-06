@@ -12,6 +12,7 @@ import com.utils.Pager;
 import net.sf.json.JSONObject;
 
 import com.mvc.entity.ComoCompareRemo;
+import com.mvc.entity.Contract;
 import com.mvc.entity.NewComoAnalyse;
 import com.mvc.entity.NewRemoAnalyse;
 import com.mvc.entity.NoBackContForm;
@@ -87,4 +88,7 @@ public interface ReportFormService {
 
 	// 查询报表页码相关
 	Pager pagerTotal_payment(Map<String, Object> map, Integer page);
+
+	//查询合同总金额,累计总金额,已开发票总金额,未开发票总金额
+	List<Object> findTotalMoney(Map<String, Object> map);
 }

@@ -1131,5 +1131,18 @@ public class ReportFormServiceImpl implements ReportFormService {
 
 		return pager;
 	}
+	//查询合同总金额,累计总金额,已开发票总金额,未开发票总金额
+	@Override
+	public List<Object> findTotalMoney(Map<String, Object> map) {
+		List<PaymentPlanListForm> listGoal = new ArrayList<PaymentPlanListForm>();
+		List<Object> list=contractDao.findTotalMoney(map);
+		/*for(int i = 0;i<list.size();i++){
+			list.get(i).
+			System.out.println(list.get(i).getCont_money());	
+			}*/
+		
+		
+		return list;
+	}
 
 }

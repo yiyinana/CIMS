@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import com.base.enums.ConExecStatus;
 import com.mvc.dao.ContractDao;
 import com.mvc.entity.Contract;
+import com.mvc.entity.PaymentPlanListForm;
 import com.utils.Pager;
 
 /**
@@ -707,5 +708,29 @@ public class ContractDaoImpl implements ContractDao {
 		Double totalRow = (Double) query.getSingleResult();
 		em.close();
 		return totalRow.floatValue();
+	}
+
+	//查询合同总金额,累计总金额,已开发票总金额,未开发票总金额
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Object> findTotalMoney(Map<String, Object> map) {
+		String province = (String) map.get("province");// 行政区域
+		String startTime = (String) map.get("startTime");
+		String endTime = (String) map.get("endTime");
+		
+		EntityManager em = emf.createEntityManager();
+		StringBuilder sql = new StringBuilder();
+		sql.append("select coalesce(sum(cont_money),0) cont_money,coalesce(sum(remo_totalmoney),0) remo_totalmoney,"
+				+ "coalesce(sum(invo_totalmoney),0) invo_totalmoney from contract c where c.cont_ishistory=0 ");
+		if (province!=null) {
+			sql.append(" and c.province='" + province + "'");	
+        }
+		if (startTime != null && endTime != null) {
+			sql.append(" and c.cont_stime between '" + startTime + "'" + " and '" + endTime + "'");
+		}
+		Query query = em.createNativeQuery(sql.toString());
+		List<Object> list = query.getResultList();
+		em.close();
+		return list;
 	}
 }
