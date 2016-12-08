@@ -595,8 +595,8 @@ public class ReportFormServiceImpl implements ReportFormService {
 				liSum.add(String.valueOf(colSum));
 			}
 			listGoal.add(liSum);
-
 		}
+		
 		return listGoal;
 	}
 
