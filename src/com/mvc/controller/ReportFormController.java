@@ -28,7 +28,6 @@ import com.mvc.entity.NoBackContForm;
 import com.mvc.entity.PaymentPlanListForm;
 import com.mvc.service.ContractService;
 import com.mvc.service.ReportFormService;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.Template;
 import com.utils.DoubleFloatUtil;
 import com.utils.FileHelper;
 import com.utils.Pager;
@@ -73,6 +72,7 @@ public class ReportFormController {
 		Integer cont_type = null;
 		String pro_stage = null;
 		Integer managerId = null;
+		Integer headerId = null;
 		Integer cont_status = null;
 		String province = null;
 		String startTime = null;
@@ -87,6 +87,9 @@ public class ReportFormController {
 		if (StringUtil.strIsNotEmpty(request.getParameter("userId"))) {
 			managerId = Integer.valueOf(request.getParameter("userId"));// 设总
 		}
+		if (StringUtil.strIsNotEmpty(request.getParameter("headerId"))) {
+			headerId = Integer.valueOf(request.getParameter("headerId"));// 设总
+		}
 		if (StringUtil.strIsNotEmpty(request.getParameter("contStatus"))) {
 			cont_status = Integer.valueOf(request.getParameter("contStatus"));// 合同状态
 		}
@@ -94,16 +97,17 @@ public class ReportFormController {
 			province = request.getParameter("province");// 省份
 		}
 		if (StringUtil.strIsNotEmpty(request.getParameter("startDate"))) {
-			startTime = request.getParameter("startDate") + "-01";// 开始时间
+			startTime = request.getParameter("startDate");// 开始时间
 		}
 		if (StringUtil.strIsNotEmpty(request.getParameter("endDate"))) {
-			endTime = request.getParameter("endDate") + "-01";// 结束时间
+			endTime = request.getParameter("endDate");// 结束时间
 		}
 
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("cont_type", cont_type);
 		map.put("pro_stage", pro_stage);
 		map.put("managerId", managerId);
+		map.put("headerId", headerId);
 		map.put("cont_status", cont_status);
 		map.put("province", province);
 		map.put("startTime", startTime);
@@ -129,10 +133,14 @@ public class ReportFormController {
 		Pager pager = reportFormService.pagerTotal(map, page);
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		List<ProjectStatisticForm> list = reportFormService.findProjectStatistic(map, pager, path);
+		ProjectStatisticForm sum = list.remove(list.size() - 1);// 获取统计列，并删除
 
 		jsonObject = new JSONObject();
 		jsonObject.put("list", list);
 		jsonObject.put("totalPage", pager.getTotalPage());
+		jsonObject.put("totalRow", pager.getTotalRow());
+		jsonObject.put("totalMoney", sum.getCont_money());
+		jsonObject.put("totalCapacity", sum.getInstall_capacity());
 		return jsonObject.toString();
 	}
 
@@ -160,10 +168,10 @@ public class ReportFormController {
 			province = request.getParameter("province");// 省份
 		}
 		if (StringUtil.strIsNotEmpty(request.getParameter("startDate"))) {
-			startTime = request.getParameter("startDate") + "-01";// 开始时间
+			startTime = request.getParameter("startDate");// 开始时间
 		}
 		if (StringUtil.strIsNotEmpty(request.getParameter("endDate"))) {
-			endTime = request.getParameter("endDate") + "-01";// 结束时间
+			endTime = request.getParameter("endDate");// 结束时间
 		}
 
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -193,10 +201,13 @@ public class ReportFormController {
 		Pager pager = reportFormService.pagerTotalNoBack(map, page);
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		List<NoBackContForm> list = reportFormService.findNoBackCont(map, pager, path);
+		NoBackContForm sum = list.remove(list.size() - 1);// 获取统计列，并删除
 
 		jsonObject = new JSONObject();
 		jsonObject.put("list", list);
 		jsonObject.put("totalPage", pager.getTotalPage());
+		jsonObject.put("totalRow", pager.getTotalRow());
+		jsonObject.put("totalMoney", sum.getCont_money());
 		return jsonObject.toString();
 	}
 
@@ -211,7 +222,6 @@ public class ReportFormController {
 		List<List<String>> list = reportFormService.findContNumSum();
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("list", list);
-		System.out.println(jsonObject.toString());
 		return jsonObject.toString();
 	}
 

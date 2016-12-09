@@ -197,11 +197,14 @@ public class ReportFormServiceImpl implements ReportFormService {
 	 */
 	private List<ProjectStatisticForm> contToProStatis(Iterator<Contract> it) {
 		List<ProjectStatisticForm> listGoal = new ArrayList<ProjectStatisticForm>();
+		ProjectStatisticForm projectStatisticForm = null;
+		Float totalMoney = 0f;// 总金额
+		Float totalCapa = 0f;// 总装机容量
 		int i = 0;
 		while (it.hasNext()) {// 赋值顺序和表头无关
 			i++;
 			Contract contract = it.next();
-			ProjectStatisticForm projectStatisticForm = new ProjectStatisticForm();
+			projectStatisticForm = new ProjectStatisticForm();
 			projectStatisticForm.setPrsf_id(i);// 序号
 			Integer cont_type = contract.getCont_type();
 			projectStatisticForm.setCont_type(ContractType.intToStr(cont_type));// 合同类型
@@ -214,8 +217,16 @@ public class ReportFormServiceImpl implements ReportFormService {
 			String proStageStr = contract.getPro_stage();// 设计阶段（数字类型字符串）
 			proStageStr = intStrToStr(proStageStr);
 			projectStatisticForm.setPro_stage(proStageStr);// 设计阶段（项目阶段）
-			projectStatisticForm.setInstall_capacity(contract.getInstall_capacity());// 装机容量（MW）
-			projectStatisticForm.setCont_money(contract.getCont_money());// 合同额(万元)
+			Float inst_capa = contract.getInstall_capacity();
+			if (inst_capa != null) {
+				totalCapa += inst_capa;
+			}
+			projectStatisticForm.setInstall_capacity(inst_capa);// 装机容量（MW）
+			Float cont_money = contract.getCont_money();
+			if (cont_money != null) {
+				totalMoney += cont_money;
+			}
+			projectStatisticForm.setCont_money(cont_money);// 合同额(万元)
 
 			String cont_status = null;
 			Integer isOrNo = contract.getCont_initiation();// 是否立项
@@ -236,6 +247,13 @@ public class ReportFormServiceImpl implements ReportFormService {
 
 			listGoal.add(projectStatisticForm);
 		}
+
+		projectStatisticForm = new ProjectStatisticForm();// 总计
+		projectStatisticForm.setCont_project("总计");
+		projectStatisticForm.setCont_money(totalMoney);
+		projectStatisticForm.setInstall_capacity(totalCapa);
+		listGoal.add(projectStatisticForm);
+
 		return listGoal;
 	}
 
@@ -247,15 +265,21 @@ public class ReportFormServiceImpl implements ReportFormService {
 	 */
 	private List<NoBackContForm> contToNoBackCont(Iterator<Contract> it) {
 		List<NoBackContForm> listGoal = new ArrayList<NoBackContForm>();
+		NoBackContForm noBackContForm = null;
+		Float totalMoney = 0f;
 		int i = 0;
 		while (it.hasNext()) {// 赋值顺序和表头无关
 			i++;
 			Contract contract = it.next();
-			NoBackContForm noBackContForm = new NoBackContForm();
+			noBackContForm = new NoBackContForm();
 			noBackContForm.setNb_id(i);// 序号
 			noBackContForm.setCont_project(contract.getCont_project());// 项目名称
 			noBackContForm.setCont_client(contract.getCont_client());// 业主单位
-			noBackContForm.setCont_money(contract.getCont_money());// 合同额(万元)
+			Float cont_money = contract.getCont_money();
+			if (cont_money != null) {
+				totalMoney += cont_money;
+			}
+			noBackContForm.setCont_money(cont_money);// 合同额(万元)
 			if (contract.getManager() != null) {
 				noBackContForm.setHandler(contract.getManager().getUser_name());// 经手人(设总)
 			}
@@ -265,6 +289,12 @@ public class ReportFormServiceImpl implements ReportFormService {
 
 			listGoal.add(noBackContForm);
 		}
+
+		noBackContForm = new NoBackContForm();// 总计
+		noBackContForm.setCont_project("总计");
+		noBackContForm.setCont_money(totalMoney);
+		listGoal.add(noBackContForm);
+
 		return listGoal;
 	}
 
@@ -294,6 +324,7 @@ public class ReportFormServiceImpl implements ReportFormService {
 		Integer cont_type = null;
 		String pro_stage = null;
 		Integer managerId = null;
+		Integer headerId = null;
 		Integer cont_status = null;
 		String province = null;
 		String startTime = null;
@@ -312,6 +343,11 @@ public class ReportFormServiceImpl implements ReportFormService {
 		if (jsonObject.containsKey("userId")) {
 			if (StringUtil.strIsNotEmpty(jsonObject.getString("userId"))) {
 				managerId = Integer.valueOf(jsonObject.getString("userId"));// 设总
+			}
+		}
+		if (jsonObject.containsKey("headerId")) {
+			if (StringUtil.strIsNotEmpty(jsonObject.getString("headerId"))) {
+				headerId = Integer.valueOf(jsonObject.getString("headerId"));// 设总
 			}
 		}
 		if (jsonObject.containsKey("contStatus")) {
@@ -344,6 +380,7 @@ public class ReportFormServiceImpl implements ReportFormService {
 		map.put("cont_type", cont_type);
 		map.put("pro_stage", pro_stage);
 		map.put("managerId", managerId);
+		map.put("headerId", headerId);
 		map.put("cont_status", cont_status);
 		map.put("province", province);
 		map.put("startTime", startTime);
@@ -596,7 +633,7 @@ public class ReportFormServiceImpl implements ReportFormService {
 			}
 			listGoal.add(liSum);
 		}
-		
+
 		return listGoal;
 	}
 
@@ -1135,7 +1172,8 @@ public class ReportFormServiceImpl implements ReportFormService {
 	// 查询合同总金额,累计总金额,已开发票总金额,未开发票总金额
 	@Override
 	public List<Object> findTotalMoney(Map<String, Object> map) {
-		List<PaymentPlanListForm> listGoal = new ArrayList<PaymentPlanListForm>();
+		// List<PaymentPlanListForm> listGoal = new
+		// ArrayList<PaymentPlanListForm>();
 		List<Object> list = contractDao.findTotalMoney(map);
 		/*
 		 * for(int i = 0;i<list.size();i++){ list.get(i).
