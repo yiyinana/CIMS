@@ -633,7 +633,11 @@ public class ReportFormServiceImpl implements ReportFormService {
 			}
 			listGoal.add(liSum);
 		}
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> 2be3b4e1cace85d03afb8806e9a95791bbf5b715
 		return listGoal;
 	}
 
