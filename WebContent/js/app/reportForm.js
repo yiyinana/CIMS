@@ -742,6 +742,10 @@ app
 							}
 							// zq项目汇总查询
 							reportForm.selectProjectSummaryBylimits = function() {
+								if (!reportForm.proSumLimit.year) {
+									alert("请填写查询年份！");
+									return false;
+								}
 								var pLimit = JSON
 										.stringify(reportForm.proSumLimit);
 								services.selectProjectSummaryBylimits({
