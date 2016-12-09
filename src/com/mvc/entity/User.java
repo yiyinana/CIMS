@@ -35,7 +35,6 @@ public class User implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-
 	public Integer getUser_id() {
 		return user_id;
 	}
