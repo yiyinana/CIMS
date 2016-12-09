@@ -612,7 +612,6 @@ app
 
 								paymentPlanListLimits = JSON
 										.stringify(reportForm.paymentLimit);
-
 								services
 										.getPaymentPlanList({
 											limit : paymentPlanListLimits,
@@ -802,7 +801,6 @@ app
 										summaryGoal : 0,
 										year : ""
 									};
-
 								}
 							}
 
