@@ -45,13 +45,16 @@
 
 			</form>
 		</div>
+		<ul style="text-align: left">
+			<li><span>总共有{{totalRow}}条记录，累计合同总金额{{totalMoney|numberFloat}}万元，累计到款总金额{{remo_totalmoney|numberFloat }}万元，累计开发票总金额{{invo_totalmoney|numberFloat}}万元，累计未开发票总金额{{invo_not_totalmoney|numberFloat}}万元</span></li>
+		</ul>
 		<ul style="text-align: right">
 			<li><span>金额单位：万元</span></li>
 		</ul>
 
 	</div>
 
-	<table class="tablelist">
+	<table class="tablelist" id="paymentSheet">
 		<thead>
 			<tr>
 				<th>序号</th>
@@ -89,7 +92,7 @@
 			</tr>
 		</tbody>
 	</table>
-
+    <label class="error-label" ng-show="listIsShow">对不起，未找到相关数据</label>
 	<div class="tcdPageCode">页码容器</div>
 </div>
 <script>

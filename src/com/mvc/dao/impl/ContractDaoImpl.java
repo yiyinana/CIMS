@@ -204,6 +204,7 @@ public class ContractDaoImpl implements ContractDao {
 	}
 
 	/***** 报表相关 *****/
+	/*************** 王睿 方法起始 *******************/
 	// 光电院项目分项统计表
 	@SuppressWarnings("unchecked")
 	@Override
@@ -365,6 +366,60 @@ public class ContractDaoImpl implements ContractDao {
 		em.close();
 		return totalRow.longValue();
 	}
+
+	// 动态获取Sql语句（年份sum语句）
+	@Override
+	public String findYearsSql() {
+		EntityManager em = emf.createEntityManager();
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT GROUP_CONCAT(DISTINCT CONCAT('sum(case when DATE_FORMAT(cont_stime,\"%Y\")=''',");
+		sql.append("DATE_FORMAT(cont_stime,\"%Y\"),''' then 1 else 0 end) as ''',DATE_FORMAT(cont_stime,\"%Y\"),'''')");
+		sql.append("  order by cont_stime) FROM contract where cont_ishistory=0");
+		Query query = em.createNativeQuery(sql.toString());
+		String str = (String) query.getSingleResult();
+		em.close();
+		return str;
+	}
+
+	// 动态获取所有年份
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Object> findYears() {
+		EntityManager em = emf.createEntityManager();
+		StringBuilder sql = new StringBuilder();
+		sql.append(
+				"select DATE_FORMAT(cont_stime,\"%Y\") from contract where cont_stime is not null and cont_ishistory=0");
+		sql.append(" group by DATE_FORMAT(cont_stime,\"%Y\") ");
+		Query query = em.createNativeQuery(sql.toString());
+		List<Object> result = query.getResultList();
+		em.close();
+		return result;
+	}
+
+	// 统计汇总表（合同数量）
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Object> findContNumSum(List<String> sqllist, String yearsStr) {
+		EntityManager em = emf.createEntityManager();
+		StringBuilder sql = new StringBuilder();
+		sql.append("select p.province '区域'," + yearsStr + " from");
+		sql.append("(select province from contract where cont_ishistory=0 group by province) as p");
+		sql.append(" left join (select province," + sqllist.get(0));
+		sql.append(" from contract where cont_type=0 and cont_ishistory=0 group by province) as aa");
+		sql.append(" on p.province=aa.province left join (select province," + sqllist.get(1));
+		sql.append(" from contract where cont_type=1 and cont_ishistory=0 group by province) as bb");
+		sql.append(" on p.province=bb.province left join (select province," + sqllist.get(2));
+		sql.append(" from contract where cont_type=2 and cont_ishistory=0 group by province) as cc");
+		sql.append(" on p.province=cc.province left join (select province," + sqllist.get(3));
+		sql.append(" from contract where cont_type=3 and cont_ishistory=0 group by province) as dd");
+		sql.append(" on p.province=dd.province");
+		Query query = em.createNativeQuery(sql.toString());
+		List<Object> result = query.getResultList();
+		em.close();
+		return result;
+	}
+
+	/*************** 王睿 方法终止 *******************/
 
 	// 查询未返回合同统计表总条数
 	@Override
@@ -652,5 +707,29 @@ public class ContractDaoImpl implements ContractDao {
 		Double totalRow = (Double) query.getSingleResult();
 		em.close();
 		return totalRow.floatValue();
+	}
+
+	// 查询合同总金额,累计总金额,已开发票总金额,未开发票总金额
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Object> findTotalMoney(Map<String, Object> map) {
+		String province = (String) map.get("province");// 行政区域
+		String startTime = (String) map.get("startTime");
+		String endTime = (String) map.get("endTime");
+
+		EntityManager em = emf.createEntityManager();
+		StringBuilder sql = new StringBuilder();
+		sql.append("select coalesce(sum(cont_money),0) cont_money,coalesce(sum(remo_totalmoney),0) remo_totalmoney,"
+				+ "coalesce(sum(invo_totalmoney),0) invo_totalmoney from contract c where c.cont_ishistory=0 ");
+		if (province != null) {
+			sql.append(" and c.province='" + province + "'");
+		}
+		if (startTime != null && endTime != null) {
+			sql.append(" and c.cont_stime between '" + startTime + "'" + " and '" + endTime + "'");
+		}
+		Query query = em.createNativeQuery(sql.toString());
+		List<Object> list = query.getResultList();
+		em.close();
+		return list;
 	}
 }

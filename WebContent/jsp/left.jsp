@@ -95,6 +95,8 @@
 					href="${ctx}/reportForm/toReportFormPage.do#/unGetContList">未返合同明细表</a><i></i></li>
 				<li id="summarySheet"><cite></cite> <a
 					href="${ctx}/reportForm/toReportFormPage.do#/summarySheet">项目明细表</a><i></i></li>
+				<li id="projectSummaryList"><cite></cite> <a
+					href="${ctx}/reportForm/toReportFormPage.do#/projectSummaryList">项目汇总表</a><i></i></li>
 			</ul>
 		</dd>
 	</dl>

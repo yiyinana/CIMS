@@ -50,6 +50,12 @@ public interface ReportFormService {
 	// 查询未返回合同统计表
 	List<NoBackContForm> findNoBackCont(Map<String, Object> map, Pager pager, String path);
 
+	// 查询统计汇总表（合同数量）
+	List<List<String>> findContNumSum();
+
+	// 导出统计汇总表（合同数量）
+	ResponseEntity<byte[]> exportContNumSum(Map<String, Object> map, String path);
+
 	/************************************************ 张姣娜 ***************************************/
 	// 根据日期获取合同额到款对比表
 	ComoCompareRemo findByDate(String firstDate, String secondDate);
@@ -71,8 +77,6 @@ public interface ReportFormService {
 
 	// 根据日期导出多年光伏项目明细表
 	ResponseEntity<byte[]> exportSummarySheetList(Map<String, String> map, String path);
-	
-	
 
 	/************************************************ 王慧敏 ***************************************/
 	// 导出光伏自营项目催款计划表
@@ -83,4 +87,7 @@ public interface ReportFormService {
 
 	// 查询报表页码相关
 	Pager pagerTotal_payment(Map<String, Object> map, Integer page);
+
+	// 查询合同总金额,累计总金额,已开发票总金额,未开发票总金额
+	List<Object> findTotalMoney(Map<String, Object> map);
 }
