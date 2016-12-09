@@ -90,8 +90,12 @@ app.config([ '$routeProvider', function($routeProvider) {
 	}).when('/summarySheet', {
 		templateUrl : '/CIMS/jsp/reportForm/summarySheet.html',
 		controller : 'ReportController'
+	}).when('/projectSummaryList', {
+		templateUrl : '/CIMS/jsp/reportForm/projectSummaryList.html',
+		controller : 'ReportController'
 	})
 } ]);
+
 app.constant('baseUrl', '/CIMS/');
 app.factory('services', [ '$http', 'baseUrl', function($http, baseUrl) {
 	var services = {};
@@ -159,6 +163,14 @@ app.factory('services', [ '$http', 'baseUrl', function($http, baseUrl) {
 			data : data
 		});
 	};
+	// zq添加项目汇总列表
+	services.selectProjectSummaryBylimits = function(data) {
+		return $http({
+			method : 'post',
+			url : baseUrl + 'reportForm/selectProjectSummaryList.do',
+			data : data
+		});
+	};
 	return services;
 } ]);
 app
@@ -220,14 +232,24 @@ app
 								}
 								proListLimits = JSON
 										.stringify(reportForm.limit);
-								services.selectProjectListBylimits({
-									limit : proListLimits,
-									page : 1
-								}).success(function(data) {
-									reportForm.prStForms = data.list;// prstForms查询出来的列表（ProjectStatisticForm）
-									pageTurn(data.totalPage, 1);
-								});
-
+								services
+										.selectProjectListBylimits({
+											limit : proListLimits,
+											page : 1
+										})
+										.success(
+												function(data) {
+													reportForm.prStForms = data.list;// prstForms查询出来的列表（ProjectStatisticForm）
+													pageTurn(data.totalPage, 1);
+													reportForm.plTotalRow = data.totalRow;
+													reportForm.plTotalMoney = data.totalMoney;
+													reportForm.plTotalCapacity = data.totalCapacity;
+													if (data.list.length) {
+														reportForm.listIsShow = false;
+													} else {
+														reportForm.listIsShow = true;
+													}
+												});
 							}
 							// zq换页查找函数2016-11-17
 							function findProjectListBylimits(p) {
@@ -520,6 +542,8 @@ app
 								}).success(function(data) {
 									reportForm.unGetContForms = data.list;
 									unGetPageTurn(data.totalPage, 1);
+									reportForm.unTotalRow = data.totalRow;
+									reportForm.unTotalMoney = data.totalMoney;
 									if (data.list.length) {
 										reportForm.listIsShow = false;
 									} else {
@@ -588,50 +612,56 @@ app
 
 								paymentPlanListLimits = JSON
 										.stringify(reportForm.paymentLimit);
-
-								services.getPaymentPlanList({
-									limit : paymentPlanListLimits,
-									page : 1
-								}).success(function(data) {
-									reportForm.payPlanForms = data.list;// payPlanForms查询出来的列表（PaymentPlanForm）
-									paymentPageTurn(data.totalPage, 1);
-									reportForm.payPlanForms = data.list;// payPlanForms查询出来的列表（PaymentPlanForm）
-									reportForm.remo_totalmoney = data.remo_totalmoney;//累计到款总金额
-									reportForm.invo_totalmoney = data.invo_totalmoney;//累计开发票总金额
-									reportForm.invo_not_totalmoney = data.invo_not_totalmoney;//累计未开发票总金额
-									reportForm.totalRow = data.totalRow;//总记录
-									reportForm.totalMoney = data.totalMoney;//合同总金额
-									setTimeout(
-											'mergeCell("paymentSheet",0,1)',
-											"0");
-									if (data.list.length) {
-										reportForm.listIsShow = false;
-									} else {
-										reportForm.listIsShow = true;
-									}
-								});
+								services
+										.getPaymentPlanList({
+											limit : paymentPlanListLimits,
+											page : 1
+										})
+										.success(
+												function(data) {
+													reportForm.payPlanForms = data.list;// payPlanForms查询出来的列表（PaymentPlanForm）
+													paymentPageTurn(
+															data.totalPage, 1);
+													reportForm.payPlanForms = data.list;// payPlanForms查询出来的列表（PaymentPlanForm）
+													reportForm.remo_totalmoney = data.remo_totalmoney;// 累计到款总金额
+													reportForm.invo_totalmoney = data.invo_totalmoney;// 累计开发票总金额
+													reportForm.invo_not_totalmoney = data.invo_not_totalmoney;// 累计未开发票总金额
+													reportForm.totalRow = data.totalRow;// 总记录
+													reportForm.totalMoney = data.totalMoney;// 合同总金额
+													setTimeout(
+															'mergeCell("paymentSheet",0,1)',
+															"0");
+													if (data.list.length) {
+														reportForm.listIsShow = false;
+													} else {
+														reportForm.listIsShow = true;
+													}
+												});
 							};
 							// lwt换页查找函数
 							function findPaymentPlanListBylimits(p) {
-								services.getPaymentPlanList({
-									limit : paymentPlanListLimits,
-									page : p
-								}).success(function(data) {
-									reportForm.payPlanForms = data.list;// payPlanForms查询出来的列表（PaymentPlanForm）
-									reportForm.remo_totalmoney = data.remo_totalmoney;//累计到款总金额
-									reportForm.invo_totalmoney = data.invo_totalmoney;//累计开发票总金额
-									reportForm.invo_not_totalmoney = data.invo_not_totalmoney;//累计未开发票总金额
-									reportForm.totalRow = data.totalRow;//总记录
-									reportForm.totalMoney = data.totalMoney;//合同总金额
-									setTimeout(
-											'mergeCell("paymentSheet",0,1)',
-											"0");
-									if (data.list.length) {
-										reportForm.listIsShow = false;
-									} else {
-										reportForm.listIsShow = true;
-									}
-								});
+								services
+										.getPaymentPlanList({
+											limit : paymentPlanListLimits,
+											page : p
+										})
+										.success(
+												function(data) {
+													reportForm.payPlanForms = data.list;// payPlanForms查询出来的列表（PaymentPlanForm）
+													reportForm.remo_totalmoney = data.remo_totalmoney;// 累计到款总金额
+													reportForm.invo_totalmoney = data.invo_totalmoney;// 累计开发票总金额
+													reportForm.invo_not_totalmoney = data.invo_not_totalmoney;// 累计未开发票总金额
+													reportForm.totalRow = data.totalRow;// 总记录
+													reportForm.totalMoney = data.totalMoney;// 合同总金额
+													setTimeout(
+															'mergeCell("paymentSheet",0,1)',
+															"0");
+													if (data.list.length) {
+														reportForm.listIsShow = false;
+													} else {
+														reportForm.listIsShow = true;
+													}
+												});
 							}
 							// lwt换页
 							function paymentPageTurn(totalPage, page) {
@@ -667,8 +697,8 @@ app
 													reportForm.summaryLists = data.list;
 													summaryPageTurn(
 															data.totalPage, 1);
-													reportForm.totalMoney = data.totalMoney;
-													reportForm.totalRow = data.totalRow;
+													reportForm.slTotalMoney = data.totalMoney;
+													reportForm.slTotalRow = data.totalRow;
 													setTimeout(
 															'mergeCell("summarySheet",0,2)',
 															"0");
@@ -710,7 +740,26 @@ app
 									});
 								}
 							}
+							// zq项目汇总查询
+							reportForm.selectProjectSummaryBylimits = function() {
+								if (!reportForm.proSumLimit.year) {
+									alert("请填写查询年份！");
+									return false;
+								}
+								var pLimit = JSON
+										.stringify(reportForm.proSumLimit);
+								services.selectProjectSummaryBylimits({
+									limit : pLimit
+								}).success(function(data) {
+									reportForm.prsuList = data.list;
+									if (data.list.length) {
+										reportForm.listIsShow = false;
+									} else {
+										reportForm.listIsShow = true;
+									}
+								});
 
+							};
 							// 初始化
 							function initData() {
 								console.log("初始化页面信息");
@@ -724,26 +773,41 @@ app
 										'/projectList') == 0) {
 									reportForm.listIsShow = false;
 									selectUsersFromDesign();
+									selectAllUsers();
+									reportForm.plTotalRow = 0;
+									reportForm.plTotalMoney = 0;
+									reportForm.plTotalCapacity = 0;
 								} else if ($location.path().indexOf(
 										'/unGetContList') == 0) {
 									reportForm.listIsShow = false;
 									selectAllUsers();
 									selectUsersFromDesign();
+									reportForm.unTotalRow = 0;
+									reportForm.unTotalMoney = 0;
 								} else if ($location.path().indexOf(
 										'/summarySheet') == 0) {
 									reportForm.listIsShow = false;
-									reportForm.totalMoney = 0;
-									reportForm.totalRow = 0;
-								}else if($location.path().indexOf(
-								'/paymentPlanList') == 0){
+									reportForm.slTotalMoney = 0;
+									reportForm.slTotalRow = 0;
+								} else if ($location.path().indexOf(
+										'/paymentPlanList') == 0) {
 									reportForm.listIsShow = false;
-									reportForm.remo_totalmoney = 0;//累计到款总金额
-									reportForm.invo_totalmoney = 0;//累计开发票总金额
-									reportForm.invo_not_totalmoney = 0;//累计未开发票总金额
-									reportForm.totalRow =0;//总记录
-									reportForm.totalMoney = 0;//合同总金额
+									reportForm.remo_totalmoney = 0;// 累计到款总金额
+									reportForm.invo_totalmoney = 0;// 累计开发票总金额
+									reportForm.invo_not_totalmoney = 0;// 累计未开发票总金额
+									reportForm.totalRow = 0;// 总记录
+									reportForm.totalMoney = 0;// 合同总金额
+								} else if ($location.path().indexOf(
+										'/projectSummaryList') == 0) {
+									reportForm.listIsShow = false;
+									reportForm.proSumLimit = {
+										contType : -1,
+										summaryGoal : 0,
+										year : ""
+									};
 								}
 							}
+
 							initData();
 							// zq控制年月2016-11-17
 							var $dateFormat = $(".dateFormatForYM");
@@ -820,8 +884,8 @@ app.filter('cutString', function() {
 		if (input) {
 			var shortInput = input.substr(0, 10);
 			content = shortInput + "……";
-		}else{
-			content="";
+		} else {
+			content = "";
 		}
 		return content;
 	}
@@ -845,8 +909,8 @@ app.filter('dateType', function() {
 		var type = "";
 		if (input) {
 			type = new Date(input).toLocaleDateString().replace(/\//g, '-');
-		}else{
-			type="";
+		} else {
+			type = "";
 		}
 		return type;
 	}
