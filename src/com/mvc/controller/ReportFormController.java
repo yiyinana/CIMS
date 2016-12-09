@@ -22,7 +22,6 @@ import com.mvc.entity.SummarySheet;
 import com.base.constants.ReportFormConstants;
 import com.base.constants.SessionKeyConstants;
 import com.mvc.entity.ComoCompareRemo;
-import com.mvc.entity.Contract;
 import com.mvc.entity.NewComoAnalyse;
 import com.mvc.entity.NewRemoAnalyse;
 import com.mvc.entity.NoBackContForm;
@@ -276,8 +275,7 @@ public class ReportFormController {
 		String fileName = "自营项目合同额及到款分析表.docx";// 2007版
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);
 		path = FileHelper.transPath(fileName, path);// 解析后的上传路径
-		String modelPath = request.getSession().getServletContext().getRealPath(ReportFormConstants.WORD_MODEL_PATH);// 模板路径
-
+		String modelPath = request.getSession().getServletContext().getRealPath("word\\" + "template.docx");// 模板路径
 		// 获取表三（到款分析表）的相关数据
 		List<NewRemoAnalyse> newRemoAnalyseList = reportFormService.findRemoByDate(firstDate, secondDate);
 		// 获取表二（合同额分析表）的数据
@@ -462,7 +460,7 @@ public class ReportFormController {
 	 */
 	@RequestMapping("/selectPaymentPlanList.do")
 	public @ResponseBody String selectPaymentPlanList(HttpServletRequest request) {
-		String totalMoney;	
+		String totalMoney;
 		String remo_totalmoney;
 		String invo_totalmoney;
 		String invo_not_totalmoney;
@@ -473,24 +471,23 @@ public class ReportFormController {
 		Pager pager = reportFormService.pagerTotal_payment(map, page);
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		List<PaymentPlanListForm> list = reportFormService.findPaymentPlanList(map, pager, path);
-	
-		List<Object> list0=reportFormService.findTotalMoney(map);		
-		Object[] objOne1 = (Object[]) list0.get(0);		
-		totalMoney=objOne1[0].toString();
-		remo_totalmoney=objOne1[1].toString();
-		invo_totalmoney=objOne1[2].toString();
-		invo_not_totalmoney=DoubleFloatUtil.sub(totalMoney, invo_totalmoney);
-		
+
+		List<Object> list0 = reportFormService.findTotalMoney(map);
+		Object[] objOne1 = (Object[]) list0.get(0);
+		totalMoney = objOne1[0].toString();
+		remo_totalmoney = objOne1[1].toString();
+		invo_totalmoney = objOne1[2].toString();
+		invo_not_totalmoney = DoubleFloatUtil.sub(totalMoney, invo_totalmoney);
+
 		jsonObject = new JSONObject();
 		jsonObject.put("list", list);
 		jsonObject.put("totalMoney", totalMoney);
-		jsonObject.put("remo_totalmoney", remo_totalmoney);//累计到款总金额
-		jsonObject.put("invo_totalmoney", invo_totalmoney);//累计开发票总金额
-		jsonObject.put("invo_not_totalmoney", invo_not_totalmoney);//累计未开发票总金额				
-		jsonObject.put("totalRow", pager.getTotalRow());//总记录
+		jsonObject.put("remo_totalmoney", remo_totalmoney);// 累计到款总金额
+		jsonObject.put("invo_totalmoney", invo_totalmoney);// 累计开发票总金额
+		jsonObject.put("invo_not_totalmoney", invo_not_totalmoney);// 累计未开发票总金额
+		jsonObject.put("totalRow", pager.getTotalRow());// 总记录
 		jsonObject.put("totalPage", pager.getTotalPage());
 		return jsonObject.toString();
-
 
 	}
 
