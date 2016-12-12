@@ -16,6 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.ss.usermodel.Cell;
@@ -106,6 +107,7 @@ public class ExcelHelper<T> {
 		XSSFCellStyle titleStyle = getTitleStyle(workbook);
 		XSSFCellStyle headerStyle = getStyle(workbook, "header");
 		XSSFCellStyle contentStyle = getStyle(workbook, "content");
+		XSSFCellStyle numStyle = getStyle(workbook, "number");
 
 		// 合并单元格，设置表名样式
 		Cell titleCell = mergeTitle(sheet, headerSource);
@@ -160,9 +162,11 @@ public class ExcelHelper<T> {
 						cell.setCellValue(intValue);
 					} else if (value instanceof Float) {
 						float fValue = (Float) value;
+						cell.setCellStyle(numStyle);
 						cell.setCellValue(fValue);
 					} else if (value instanceof Double) {
 						double dValue = (Double) value;
+						cell.setCellStyle(numStyle);
 						cell.setCellValue(dValue);
 					} else if (value instanceof Long) {
 						long longValue = (Long) value;
@@ -317,8 +321,8 @@ public class ExcelHelper<T> {
 		style.setBorderTop(CellStyle.BORDER_THIN); // 上边边框
 		style.setTopBorderColor(IndexedColors.BLACK.getIndex()); // 上边边框颜色
 
-		style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-		style.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 垂直对齐居中
+		style.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+		style.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直对齐居中
 
 		// 生成另一个字体
 		XSSFFont font = workbook.createFont();
@@ -327,10 +331,13 @@ public class ExcelHelper<T> {
 		switch (type) {
 		case "header":
 			font.setFontHeightInPoints((short) 10); // 设置字体大小
-			font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);// 字体加粗
+			font.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);// 字体加粗
 			break;
 		case "content":
 			font.setFontHeightInPoints((short) 10); // 设置字体大小
+			break;
+		case "number":// 设置单元格为数值类型，避免float精度问题
+			style.setDataFormat(HSSFDataFormat.getBuiltinFormat("0.00"));
 			break;
 		default:
 			break;
@@ -356,8 +363,8 @@ public class ExcelHelper<T> {
 			XSSFWorkbook workBook) {
 		XSSFCellStyle style = workBook.createCellStyle(); // 样式对象
 
-		style.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 垂直
-		style.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 水平
+		style.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+		style.setAlignment(XSSFCellStyle.ALIGN_CENTER);// 水平
 		// 获取第一行的数据,以便后面进行比较
 		String s_will = sheet.getRow(startRow).getCell(cellLine).getStringCellValue();
 

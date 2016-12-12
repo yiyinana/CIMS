@@ -198,11 +198,14 @@ public class ReportFormServiceImpl implements ReportFormService {
 	 */
 	private List<ProjectStatisticForm> contToProStatis(Iterator<Contract> it) {
 		List<ProjectStatisticForm> listGoal = new ArrayList<ProjectStatisticForm>();
+		ProjectStatisticForm projectStatisticForm = null;
+		Float totalMoney = 0f;// 总金额
+		Float totalCapa = 0f;// 总装机容量
 		int i = 0;
 		while (it.hasNext()) {// 赋值顺序和表头无关
 			i++;
 			Contract contract = it.next();
-			ProjectStatisticForm projectStatisticForm = new ProjectStatisticForm();
+			projectStatisticForm = new ProjectStatisticForm();
 			projectStatisticForm.setPrsf_id(i);// 序号
 			Integer cont_type = contract.getCont_type();
 			projectStatisticForm.setCont_type(ContractType.intToStr(cont_type));// 合同类型
@@ -215,8 +218,16 @@ public class ReportFormServiceImpl implements ReportFormService {
 			String proStageStr = contract.getPro_stage();// 设计阶段（数字类型字符串）
 			proStageStr = intStrToStr(proStageStr);
 			projectStatisticForm.setPro_stage(proStageStr);// 设计阶段（项目阶段）
-			projectStatisticForm.setInstall_capacity(contract.getInstall_capacity());// 装机容量（MW）
-			projectStatisticForm.setCont_money(contract.getCont_money());// 合同额(万元)
+			Float inst_capa = contract.getInstall_capacity();
+			if (inst_capa != null) {
+				totalCapa += inst_capa;
+			}
+			projectStatisticForm.setInstall_capacity(inst_capa);// 装机容量（MW）
+			Float cont_money = contract.getCont_money();
+			if (cont_money != null) {
+				totalMoney += cont_money;
+			}
+			projectStatisticForm.setCont_money(cont_money);// 合同额(万元)
 
 			String cont_status = null;
 			Integer isOrNo = contract.getCont_initiation();// 是否立项
@@ -237,6 +248,13 @@ public class ReportFormServiceImpl implements ReportFormService {
 
 			listGoal.add(projectStatisticForm);
 		}
+
+		projectStatisticForm = new ProjectStatisticForm();// 总计
+		projectStatisticForm.setCont_project("总计");
+		projectStatisticForm.setCont_money(totalMoney);
+		projectStatisticForm.setInstall_capacity(totalCapa);
+		listGoal.add(projectStatisticForm);
+
 		return listGoal;
 	}
 
@@ -248,15 +266,21 @@ public class ReportFormServiceImpl implements ReportFormService {
 	 */
 	private List<NoBackContForm> contToNoBackCont(Iterator<Contract> it) {
 		List<NoBackContForm> listGoal = new ArrayList<NoBackContForm>();
+		NoBackContForm noBackContForm = null;
+		Float totalMoney = 0f;
 		int i = 0;
 		while (it.hasNext()) {// 赋值顺序和表头无关
 			i++;
 			Contract contract = it.next();
-			NoBackContForm noBackContForm = new NoBackContForm();
+			noBackContForm = new NoBackContForm();
 			noBackContForm.setNb_id(i);// 序号
 			noBackContForm.setCont_project(contract.getCont_project());// 项目名称
 			noBackContForm.setCont_client(contract.getCont_client());// 业主单位
-			noBackContForm.setCont_money(contract.getCont_money());// 合同额(万元)
+			Float cont_money = contract.getCont_money();
+			if (cont_money != null) {
+				totalMoney += cont_money;
+			}
+			noBackContForm.setCont_money(cont_money);// 合同额(万元)
 			if (contract.getManager() != null) {
 				noBackContForm.setHandler(contract.getManager().getUser_name());// 经手人(设总)
 			}
@@ -266,6 +290,12 @@ public class ReportFormServiceImpl implements ReportFormService {
 
 			listGoal.add(noBackContForm);
 		}
+
+		noBackContForm = new NoBackContForm();// 总计
+		noBackContForm.setCont_project("总计");
+		noBackContForm.setCont_money(totalMoney);
+		listGoal.add(noBackContForm);
+
 		return listGoal;
 	}
 
@@ -295,6 +325,7 @@ public class ReportFormServiceImpl implements ReportFormService {
 		Integer cont_type = null;
 		String pro_stage = null;
 		Integer managerId = null;
+		Integer headerId = null;
 		Integer cont_status = null;
 		String province = null;
 		String startTime = null;
@@ -313,6 +344,11 @@ public class ReportFormServiceImpl implements ReportFormService {
 		if (jsonObject.containsKey("userId")) {
 			if (StringUtil.strIsNotEmpty(jsonObject.getString("userId"))) {
 				managerId = Integer.valueOf(jsonObject.getString("userId"));// 设总
+			}
+		}
+		if (jsonObject.containsKey("headerId")) {
+			if (StringUtil.strIsNotEmpty(jsonObject.getString("headerId"))) {
+				headerId = Integer.valueOf(jsonObject.getString("headerId"));// 设总
 			}
 		}
 		if (jsonObject.containsKey("contStatus")) {
@@ -345,6 +381,7 @@ public class ReportFormServiceImpl implements ReportFormService {
 		map.put("cont_type", cont_type);
 		map.put("pro_stage", pro_stage);
 		map.put("managerId", managerId);
+		map.put("headerId", headerId);
 		map.put("cont_status", cont_status);
 		map.put("province", province);
 		map.put("startTime", startTime);
@@ -704,40 +741,37 @@ public class ReportFormServiceImpl implements ReportFormService {
 			Double como_one = (double) objOne[1];
 			Double como_two = (double) objOne[2];
 			newComoAnalyse.setProvince(objOne[0].toString());
-			if (como_one == 0) {
-				newComoAnalyse.setComo_one("");
-				newComoAnalyse.setRise_ratio("");
-			} else {
+			if (como_one != 0) {
+//				newComoAnalyse.setComo_one("");
+//				newComoAnalyse.setRise_ratio("");
+//			} else {
 				newComoAnalyse.setComo_one(objOne[1].toString());
 				Double rise_ratio = (como_two - como_one) / como_one * 100;
-				String ratio = String.format("%.2f", rise_ratio) + "%";
-				newComoAnalyse.setRise_ratio(ratio);
+				newComoAnalyse.setRise_ratio(String.format("%.2f", rise_ratio) + "%");
 			}
-			if (como_two == 0) {
-				newComoAnalyse.setComo_two("");
-			} else {
+			if (como_two != 0) {
+				// newComoAnalyse.setComo_two("");
+				// } else {
 				newComoAnalyse.setComo_two(objOne[2].toString());
 			}
 			if (totalOne == 0 || como_one == 0) {
 				newComoAnalyse.setRatio_one_provi("");
 			} else {
 				Double ratio_one_provi = como_one / totalOne * 100;
-				String ratio = String.format("%.2f", ratio_one_provi) + "%";
-				newComoAnalyse.setRatio_one_provi(ratio);
+				newComoAnalyse.setRatio_one_provi(String.format("%.2f", ratio_one_provi) + "%");
 			}
 			if (totalTwo == 0 || como_two == 0) {
 				newComoAnalyse.setRatio_two_provi("");
 			} else {
 				Double ratio_two_provi = como_two / totalTwo * 100;
-				String ratio = String.format("%.2f", ratio_two_provi) + "%";
-				newComoAnalyse.setRatio_two_provi(ratio);
+				newComoAnalyse.setRatio_two_provi(String.format("%.2f", ratio_two_provi) + "%");
 			}
 			newComos.add(newComoAnalyse);
 		}
 		NewComoAnalyse newComoAnalyse = new NewComoAnalyse();
 		newComoAnalyse.setProvince("总计：");
-		newComoAnalyse.setComo_one(totalOne.toString());
-		newComoAnalyse.setComo_two(totalTwo.toString());
+		newComoAnalyse.setComo_one(String.format("%.2f", totalOne));
+		newComoAnalyse.setComo_two(String.format("%.2f", totalTwo));
 		newComos.add(newComoAnalyse);
 		return newComos;
 	}
@@ -747,70 +781,52 @@ public class ReportFormServiceImpl implements ReportFormService {
 	public List<NewRemoAnalyse> findRemoByDate(String firstDate, String secondDate) {
 		List<Object> objects = receiveMoneyDao.findRemoByDate(firstDate, secondDate);
 		List<NewRemoAnalyse> newRemos = new ArrayList<NewRemoAnalyse>();
+		// 在列表末尾追加统计信息
+		Double totalRemoOne = (double) 0, totalRemoTwo = (double) 0, totalRemoBefore = (double) 0,
+				totalRemoCurr = (double) 0, totalExpRemoTwoCurr = (double) 0, totalExpRemoTwoBefore = (double) 0;
+
 		for (int i = 0; i < objects.size(); i++) {
 			Object[] object = (Object[]) objects.get(i);
 			NewRemoAnalyse newRemoAnalyse = new NewRemoAnalyse();
 			Integer orderNum = i + 1;
 			newRemoAnalyse.setOrder_number(orderNum.toString());
 			newRemoAnalyse.setProvince(object[0].toString());
-			if ((double) object[1] == 0) {
-				newRemoAnalyse.setRemo_one("");
-			} else {
+			if ((double) object[1] != 0) {
 				newRemoAnalyse.setRemo_one(object[1].toString());
+				totalRemoOne += (double) object[1];
 			}
-			if ((double) object[2] == 0) {
-				newRemoAnalyse.setRemo_two("");
-			} else {
+			if ((double) object[2] != 0) {
 				newRemoAnalyse.setRemo_two(object[2].toString());
+				totalRemoTwo += (double) object[2];
 			}
-			if ((double) object[3] == 0) {
-				newRemoAnalyse.setRemo_before("");
-			} else {
+			if ((double) object[3] != 0) {
 				newRemoAnalyse.setRemo_before(object[3].toString());
+				totalRemoBefore += (double) object[3];
 			}
-			if ((double) object[4] == 0) {
-				newRemoAnalyse.setRemo_curr("");
-			} else {
+			if ((double) object[4] != 0) {
 				newRemoAnalyse.setRemo_curr(object[4].toString());
+				totalRemoCurr += (double) object[4];
 			}
-			if ((double) object[5] == 0) {
-				newRemoAnalyse.setExp_remo_two_curr("");
-			} else {
+			if ((double) object[5] != 0) {
 				Double exp_remo_two_curr = (double) object[5] - (double) object[2];
 				newRemoAnalyse.setExp_remo_two_curr(String.format("%.2f", exp_remo_two_curr));
+				totalExpRemoTwoCurr += exp_remo_two_curr;
 			}
-			if ((double) object[6] == 0) {
-				newRemoAnalyse.setExp_remo_two_before("");
-			} else {
+			if ((double) object[6] != 0) {
 				Double exp_remo_two_before = (double) object[6] - (double) object[3];
 				newRemoAnalyse.setExp_remo_two_before(String.format("%.2f", exp_remo_two_before));
+				totalExpRemoTwoBefore += exp_remo_two_before;
 			}
 			newRemos.add(newRemoAnalyse);
 		}
-		// 在列表末尾追加统计信息
-		Double totalRemoOne = (double) 0;
-		Double totalRemoTwo = (double) 0;
-		Double totalRemoBefore = (double) 0;
-		Double totalRemoCurr = (double) 0;
-		Double totalExpRemoTwoCurr = (double) 0;
-		Double totalExpRemoTwoBefore = (double) 0;
-		for (int i = 0; i < objects.size(); i++) {
-			Object[] object = (Object[]) objects.get(i);
-			totalRemoOne += (double) object[1];
-			totalRemoTwo += (double) object[2];
-			totalRemoBefore += (double) object[3];
-			totalRemoCurr += (double) object[4];
-			totalExpRemoTwoCurr += (double) object[5];
-			totalExpRemoTwoBefore += (double) object[6];
-		}
 		NewRemoAnalyse newRemoAnalyse = new NewRemoAnalyse();
 		newRemoAnalyse.setProvince("总计：");
-		newRemoAnalyse.setRemo_one(totalRemoOne.toString());
-		newRemoAnalyse.setRemo_two(totalRemoTwo.toString());
-		newRemoAnalyse.setRemo_before(totalRemoBefore.toString());
-		newRemoAnalyse.setRemo_curr(totalRemoCurr.toString());
-		newRemoAnalyse.setExp_remo_two_curr(totalExpRemoTwoCurr.toString());
-		newRemoAnalyse.setExp_remo_two_before(totalExpRemoTwoBefore.toString());
+		newRemoAnalyse.setRemo_one(String.format("%.2f", totalRemoOne));
+		newRemoAnalyse.setRemo_two(String.format("%.2f", totalRemoTwo));
+		newRemoAnalyse.setRemo_before(String.format("%.2f", totalRemoBefore));
+		newRemoAnalyse.setRemo_curr(String.format("%.2f", totalRemoCurr));
+		newRemoAnalyse.setExp_remo_two_curr(String.format("%.2f", totalExpRemoTwoCurr));
+		newRemoAnalyse.setExp_remo_two_before(String.format("%.2f", totalExpRemoTwoBefore));
 		newRemos.add(newRemoAnalyse);
 		return newRemos;
 	}

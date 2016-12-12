@@ -31,7 +31,6 @@
 		<caption>自营合同额到款对比表</caption>
 		<thead ng-show="table1Show">
 			<tr>
-				<th>序号</th>
 				<th>对比项</th>
 				<th>{{1|bYear}}年</th>
 				<th>{{1|eYear}}年</th>
@@ -40,21 +39,18 @@
 		</thead>
 		<tbody ng-show="table1Show">
 			<tr>
-				<td>1</td>
 				<td>合同额</td>
 				<td>{{comoCompareRemo.como_one}}</td>
 				<td>{{comoCompareRemo.como_two}}</td>
 				<td>{{comoCompareRemo.ratio_como}}</td>
 			</tr>
 			<tr>
-				<td>2</td>
 				<td>到款额</td>
 				<td>{{comoCompareRemo.remo_one}}</td>
 				<td>{{comoCompareRemo.remo_two}}</td>
 				<td>{{comoCompareRemo.ratio_remo}}</td>
 			</tr>
 			<tr>
-				<td>3</td>
 				<td>合同数</td>
 				<td>{{comoCompareRemo.cont_num_one}}</td>
 				<td>{{comoCompareRemo.cont_num_two}}</td>
@@ -80,7 +76,7 @@
 		</thead>
 		<tbody ng-show="table2Show">
 			<tr ng-repeat="c in newComoAnalyseList">
-				<td>{{$index + 1}}</td>
+				<td>{{c.order_number}}</td>
 				<td>{{c.province}}</td>
 				<td>{{c.como_one}}</td>
 				<td>{{c.como_two}}</td>
@@ -110,7 +106,7 @@
 		</thead>
 		<tbody ng-show="table3Show">
 			<tr ng-repeat="r in newRemoAnalysesList">
-				<td>{{$index + 1}}</td>
+				<td>{{r.order_number}}</td>
 				<td>{{r.province}}</td>
 				<td>{{r.remo_one}}</td>
 				<td>{{r.remo_two}}</td>

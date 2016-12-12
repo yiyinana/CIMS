@@ -212,6 +212,7 @@ public class ContractDaoImpl implements ContractDao {
 		Integer cont_type = (Integer) map.get("cont_type");
 		String pro_stage = (String) map.get("pro_stage");
 		Integer managerId = (Integer) map.get("managerId");
+		Integer headerId = (Integer) map.get("headerId");
 		Integer cont_status = (Integer) map.get("cont_status");
 		String province = (String) map.get("province");
 		String startTime = (String) map.get("startTime");
@@ -238,6 +239,9 @@ public class ContractDaoImpl implements ContractDao {
 		}
 		if (managerId != null) {
 			sql.append(" and c.manager_id=" + managerId);
+		}
+		if (headerId != null) {
+			sql.append(" and c.creator_id=" + headerId);
 		}
 		if (cont_status != null) {
 			switch (cont_status) {
@@ -319,6 +323,7 @@ public class ContractDaoImpl implements ContractDao {
 		Integer cont_type = (Integer) map.get("cont_type");
 		String pro_stage = (String) map.get("pro_stage");
 		Integer managerId = (Integer) map.get("managerId");
+		Integer headerId = (Integer) map.get("headerId");
 		Integer cont_status = (Integer) map.get("cont_status");
 		String province = (String) map.get("province");
 		String startTime = (String) map.get("startTime");
@@ -338,6 +343,9 @@ public class ContractDaoImpl implements ContractDao {
 		}
 		if (managerId != null) {
 			sql.append(" and c.manager_id=" + managerId);
+		}
+		if (headerId != null) {
+			sql.append(" and c.creator_id=" + headerId);
 		}
 		if (cont_status != null) {
 			switch (cont_status) {
