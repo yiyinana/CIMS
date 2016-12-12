@@ -38,6 +38,8 @@
 	<div class="loginbody">
 		<span class="systemlogo"></span>
 		<div class="loginbox">
+			<a href="/CIMS/reportForm/selectProjectSummarySheetList.do">测试</a> <a
+				href="/CIMS/reportForm/exportProjectSummaryList.do">导出</a>
 			<form action="/CIMS/login/login.do" method="post" id="login-form">
 				<ul>
 					<li><input name="userName" type="text" class="loginuser"

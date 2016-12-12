@@ -18,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.mvc.entity.ProjectStatisticForm;
+import com.mvc.entity.Summary;
 import com.mvc.entity.SummarySheet;
 import com.base.constants.ReportFormConstants;
 import com.base.constants.SessionKeyConstants;
@@ -28,7 +29,6 @@ import com.mvc.entity.NoBackContForm;
 import com.mvc.entity.PaymentPlanListForm;
 import com.mvc.service.ContractService;
 import com.mvc.service.ReportFormService;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.Template;
 import com.utils.DoubleFloatUtil;
 import com.utils.FileHelper;
 import com.utils.Pager;
@@ -451,6 +451,75 @@ public class ReportFormController {
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteArr = reportFormService.exportSummarySheetList(map, path);
 		return byteArr;
+	}
+
+	/**
+	 * 查询光伏项目汇总表
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/selectProjectSummarySheetList.do")
+	public @ResponseBody String selectSummary(HttpServletRequest request) {
+		String date = "";// 默认全部
+		Integer type = -1;// 默认全部
+		Integer flag = 0;// 0:合同数量；1：合同规模
+		JSONObject jsonObject = JSONObject.fromObject(request.getParameter("limit"));
+
+		if (jsonObject.containsKey("year")) {
+			date = jsonObject.getString("year");
+		}
+		if (jsonObject.containsKey("contType")) {
+			type = Integer.valueOf(jsonObject.getString("contType"));
+		}
+		if (jsonObject.containsKey("summaryGoal")) {
+			flag = Integer.valueOf(jsonObject.getString("summaryGoal"));
+		}
+
+		List<Summary> list = reportFormService.findSummary(date, type, flag);
+		for (int i = 0; i < list.size(); i++) {
+			System.out.println("结果集：" + list.get(i).getOrder_num() + "" + list.get(i).getProvince());
+		}
+
+		jsonObject = new JSONObject();
+		jsonObject.put("list", list);
+		return jsonObject.toString();
+	}
+
+	/**
+	 * 导出当年光伏项目汇总表
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/exportProjectSummaryList.do")
+	public ResponseEntity<byte[]> exportProjectSummaryList(HttpServletRequest request) {
+		String date = "";// 默认全部
+		Integer type = -1;// 默认全部
+		Integer flag = 0;// 0:合同数量；1：合同规模
+		JSONObject jsonObject = JSONObject.fromObject(request.getParameter("limit"));
+		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
+
+		if (jsonObject.containsKey("year")) {
+			date = jsonObject.getString("year");
+		}
+		if (jsonObject.containsKey("contType")) {
+			type = Integer.valueOf(jsonObject.getString("contType"));
+		}
+		if (jsonObject.containsKey("summaryGoal")) {
+			flag = Integer.valueOf(jsonObject.getString("summaryGoal"));
+		}
+		List<Summary> list = reportFormService.findSummary(date, type, flag);
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("summaryList", list);
+		map.put("date", date);
+		map.put("type", type);
+		map.put("flag", flag);
+		map.put("path", path);
+
+		ResponseEntity<byte[]> byteww = reportFormService.exportProjectSummary(map);
+		return byteww;
 	}
 
 	/*

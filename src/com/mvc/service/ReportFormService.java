@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 
 import com.mvc.entity.ProjectStatisticForm;
+import com.mvc.entity.Summary;
 import com.mvc.entity.SummarySheet;
 import com.utils.Pager;
 
@@ -77,6 +78,12 @@ public interface ReportFormService {
 
 	// 根据日期导出多年光伏项目明细表
 	ResponseEntity<byte[]> exportSummarySheetList(Map<String, String> map, String path);
+
+	// 查询光伏项目汇总结果
+	List<Summary> findSummary(String date, Integer type, Integer flag);
+
+	// 导出当年光伏项目汇总表
+	ResponseEntity<byte[]> exportProjectSummary(Map<String, Object> map);
 
 	/************************************************ 王慧敏 ***************************************/
 	// 导出光伏自营项目催款计划表

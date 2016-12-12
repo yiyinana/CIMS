@@ -79,6 +79,9 @@ public interface ContractDao {
 	// 根据日期获取合同总金额
 	Float getTotalMoney(String date);
 
+	// 查询光伏项目汇总结果
+	List<Object> findSummary(String date, Integer type, Integer flag);
+
 	/***** 王慧敏 *****/
 	List<Object> findContByParw(Map<String, Object> map, Pager pager);
 
