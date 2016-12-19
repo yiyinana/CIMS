@@ -24,12 +24,13 @@
 							</div>
 						</div></li> -->
 					<li><label>起止年月</label><input
-						class="dfselect layoutStyle dateFormatForYM" style="width: 63px"
-						ng-model="unGetlimit.startDate" placeholder="2016-01"
+						class="dfselect layoutStyle dateFormatForYMD" style="width: 80px"
+						ng-model="unGetlimit.startDate" placeholder="2016-01-01"
 						id="startDate" name="startDate" /><label>—</label><input
-						class="dfselect layoutStyle dateFormatForYM" style="width: 63px"
-						ng-model="unGetlimit.endDate" placeholder="2016-01" id="endDate"
-						name="endDate" /><span id="errorText" class="error-span">格式错误</span></li>
+						class="dfselect layoutStyle dateFormatForYMD" style="width: 80px"
+						ng-model="unGetlimit.endDate" placeholder="2016-01-01"
+						id="endDate" name="endDate" /><span id="errorText"
+						class="error-span">格式错误</span></li>
 					<li><label>经手人</label><select class="dfselect layoutStyle"
 						style="width: 73px" ng-model="unGetlimit.userId" name="userId"><option
 								value="">请选择</option>
@@ -46,7 +47,10 @@
 
 			</form>
 		</div>
-
+		<ul style="text-align: left">
+			<li><span>共 {{unTotalRow}} 份合同，合同总金额：{{unTotalMoney
+					|numberFloat}}万元</span></li>
+		</ul>
 	</div>
 
 	<table class="tablelist">

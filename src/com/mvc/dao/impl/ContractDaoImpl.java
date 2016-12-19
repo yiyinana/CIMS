@@ -212,6 +212,7 @@ public class ContractDaoImpl implements ContractDao {
 		Integer cont_type = (Integer) map.get("cont_type");
 		String pro_stage = (String) map.get("pro_stage");
 		Integer managerId = (Integer) map.get("managerId");
+		Integer headerId = (Integer) map.get("headerId");
 		Integer cont_status = (Integer) map.get("cont_status");
 		String province = (String) map.get("province");
 		String startTime = (String) map.get("startTime");
@@ -238,6 +239,9 @@ public class ContractDaoImpl implements ContractDao {
 		}
 		if (managerId != null) {
 			sql.append(" and c.manager_id=" + managerId);
+		}
+		if (headerId != null) {
+			sql.append(" and c.creator_id=" + headerId);
 		}
 		if (cont_status != null) {
 			switch (cont_status) {
@@ -319,6 +323,7 @@ public class ContractDaoImpl implements ContractDao {
 		Integer cont_type = (Integer) map.get("cont_type");
 		String pro_stage = (String) map.get("pro_stage");
 		Integer managerId = (Integer) map.get("managerId");
+		Integer headerId = (Integer) map.get("headerId");
 		Integer cont_status = (Integer) map.get("cont_status");
 		String province = (String) map.get("province");
 		String startTime = (String) map.get("startTime");
@@ -338,6 +343,9 @@ public class ContractDaoImpl implements ContractDao {
 		}
 		if (managerId != null) {
 			sql.append(" and c.manager_id=" + managerId);
+		}
+		if (headerId != null) {
+			sql.append(" and c.creator_id=" + headerId);
 		}
 		if (cont_status != null) {
 			switch (cont_status) {
@@ -728,6 +736,58 @@ public class ContractDaoImpl implements ContractDao {
 			sql.append(" and c.cont_stime between '" + startTime + "'" + " and '" + endTime + "'");
 		}
 		Query query = em.createNativeQuery(sql.toString());
+		List<Object> list = query.getResultList();
+		em.close();
+		return list;
+	}
+
+	// 查询光伏项目汇总结果
+	public List<Object> findSummary(String date, Integer contType, Integer flag) {
+		EntityManager em = emf.createEntityManager();
+		StringBuilder sql = new StringBuilder();
+		String summaryType = " count(*)";
+		if (flag == 1) {
+			summaryType = " coalesce(sum(install_capacity),0)";
+		}
+		String stage = " substring_index(substring_index(pro_stage, ',', -2), ',', 1)";
+
+		sql.append(
+				"select p.province ,aa1.stage1num ,aa2.stage2num ,aa3.stage3num ,aa4.stage4num ,aa5.stage5num ,aa6.stage6num ,aa7.stage7num ,aa8.stage8num ,aa9.stage9num ");
+		sql.append("from (select province from contract where cont_ishistory=0 ");
+		if (contType != -1) {
+			sql.append(" and cont_type=" + contType + "");
+		}
+		if (!date.equals("")) {
+			sql.append(" and cont_stime like '%" + date + "%' ");
+		}
+		if (flag == 1) {
+			sql.append("  and pro_stage!='' ");
+		} else {
+			sql.append("  and install_capacity!='' ");
+		}
+		sql.append(" group by province) as p");
+
+		for (int i = 0; i < 9; i++) {
+			String stageNum = " stage" + String.valueOf(i + 1) + "num";
+			String name = "aa" + String.valueOf(i + 1);
+			sql.append(" left join (select province," + summaryType + stageNum
+					+ " from contract where cont_ishistory=0 and " + stage + "=" + i);
+			if (contType != -1) {
+				sql.append(" and cont_type=" + contType + "");
+			}
+			if (!date.equals("")) {
+				sql.append(" and cont_stime like '%" + date + "%' ");
+			}
+			if (flag == 1) {
+				sql.append("  and pro_stage!='' ");
+			} else {
+				sql.append("  and install_capacity!='' ");
+			}
+			sql.append(" group by province) as " + name + " on p.province=" + name + ".province ");
+		}
+		System.out.println("sql:" + sql);
+		Query query = em.createNativeQuery(sql.toString());
+		@SuppressWarnings("unchecked")
 		List<Object> list = query.getResultList();
 		em.close();
 		return list;
