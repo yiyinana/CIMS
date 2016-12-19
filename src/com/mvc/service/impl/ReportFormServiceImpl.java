@@ -742,9 +742,9 @@ public class ReportFormServiceImpl implements ReportFormService {
 			Double como_two = (double) objOne[2];
 			newComoAnalyse.setProvince(objOne[0].toString());
 			if (como_one != 0) {
-//				newComoAnalyse.setComo_one("");
-//				newComoAnalyse.setRise_ratio("");
-//			} else {
+				// newComoAnalyse.setComo_one("");
+				// newComoAnalyse.setRise_ratio("");
+				// } else {
 				newComoAnalyse.setComo_one(objOne[1].toString());
 				Double rise_ratio = (como_two - como_one) / como_one * 100;
 				newComoAnalyse.setRise_ratio(String.format("%.2f", rise_ratio) + "%");
