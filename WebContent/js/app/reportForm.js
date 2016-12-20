@@ -142,11 +142,6 @@ app.factory('services', [ '$http', 'baseUrl', function($http, baseUrl) {
 		});
 	};
 
-	/*
-	 * services.outputComoCompareRemo = function(data) { return $http({ method :
-	 * 'post', url : baseUrl + 'reportForm/exportWord.do', data : data }); <<<<<<<
-	 * HEAD }
-	 */
 	// lwt:获取催款计划表-列表
 	services.getPaymentPlanList = function(data) {
 		return $http({
@@ -385,7 +380,7 @@ app
 																{
 																	elementId : "#pieChart1",
 																	title : beginYear
-																			+ "年自营项目新签合同额分析图（单位：万元）",
+																			+ "年自营项目新签合同额分析图",
 																	name : "合同占比",
 																	data : chart1Data
 																});
@@ -402,7 +397,7 @@ app
 																{
 																	elementId : "#pieChart2",
 																	title : endYear
-																			+ "年自营项目新签合同额分析图（单位：万元）",
+																			+ "年自营项目新签合同额分析图",
 																	name : "合同占比",
 																	data : chart2Data
 																});
@@ -419,7 +414,7 @@ app
 																{
 																	elementId : "#pieChart3",
 																	title : beginYear
-																			+ "年自营项目到款额分析图（单位：万元）",
+																			+ "年自营项目到款额分析图",
 																	name : "合同占比",
 																	data : chart3Data
 																});
@@ -436,7 +431,7 @@ app
 																{
 																	elementId : "#pieChart4",
 																	title : endYear
-																			+ "年自营项目到款额分析图（单位：万元）",
+																			+ "年自营项目到款额分析图",
 																	name : "合同占比",
 																	data : chart4Data
 																});
@@ -448,45 +443,8 @@ app
 																				.highcharts()
 																				.getSVG());
 													}
-													// if(chart2Data){
-													// var chart2 = new Chart(
-													// {
-													// elementId : "#pieChart2",
-													// title :
-													// "2014年自营项目新签合同额分析图",
-													// name : "浏览器",
-													// data : chart1Data
-													// });
-													// chart2.init();
-													// $('#chart2-svg').val($("#pieChart2").highcharts().getSVG());
-													// }
-													// if(chart3Data){
-													// var chart3 = new Chart(
-													// {
-													// elementId : "#pieChart3",
-													// title :
-													// "2014年自营项目新签合同额分析图",
-													// name : "浏览器",
-													// data : chart1Data
-													// });
-													// chart3.init();
-													// $('#chart3-svg').val($("#pieChart3").highcharts().getSVG());
-													// }
-
 												});
-
 							}
-							/*
-							 * reportForm.outputComoCompareRemo = function(e) {
-							 * preventDefault(e);
-							 * services.outputComoCompareRemo({ beginYear :
-							 * $('#begin-year').val(), endYear :
-							 * $('#end-year').val(), chart1SVGStr :
-							 * $('#chart1-svg').val(), chart2SVGStr :
-							 * $('#chart2-svg').val(), chart3SVGStr :
-							 * $('#chart3-svg').val(), }).success(function() {
-							 * alert("导出成功！") }); }
-							 */
 							function preventDefault(e) {
 								if (e && e.preventDefault) {
 									// 阻止默认浏览器动作(W3C)

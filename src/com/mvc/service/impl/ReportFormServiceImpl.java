@@ -1038,7 +1038,7 @@ public class ReportFormServiceImpl implements ReportFormService {
 			title.append("(其他)");
 		}
 		if (flag == 0) {
-			title.append("(合同数量)");
+			title.append("(合同数量(个))");
 		} else {
 			title.append("(合同规模(万MV))");
 		}
