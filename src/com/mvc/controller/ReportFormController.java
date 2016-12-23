@@ -514,8 +514,6 @@ public class ReportFormController {
 		}
 
 		List<Summary> summaryList = reportFormService.findSummary(date, type, flag);
-		// session.setAttribute(SessionKeyConstants.selectProjectSummaryList,
-		// summaryList);
 		jsonObject = new JSONObject();
 		jsonObject.put("list", summaryList);
 		return jsonObject.toString();
@@ -544,12 +542,6 @@ public class ReportFormController {
 			flag = Integer.valueOf(request.getParameter("summaryGoal"));
 		}
 		List<Summary> list = reportFormService.findSummary(date, type, flag);
-		// @SuppressWarnings("unchecked")
-		// List<Summary> list = (List<Summary>)
-		// session.getAttribute(SessionKeyConstants.selectProjectSummaryList);
-		// System.out.println("selectProjectSummaryList:"
-		// + (List<Summary>)
-		// session.getAttribute(SessionKeyConstants.selectProjectSummaryList));
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("summaryList", list);
 		map.put("date", date);

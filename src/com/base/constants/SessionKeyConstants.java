@@ -27,5 +27,4 @@ public class SessionKeyConstants {
 	public static String BEGIN_YEAR = "begin_year";
 	public static String END_YEAR = "end_year";
 	
-	public static String selectProjectSummaryList="";
 }
