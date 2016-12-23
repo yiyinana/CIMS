@@ -3,6 +3,7 @@ function Chart(data) {
 	this.title = data.title;
 	this.name = data.name;
 	this.data = data.data;
+	this.subtitle=data.subtitle;
 }
 
 Chart.prototype.init = function() {
@@ -20,6 +21,12 @@ Chart.prototype.init = function() {
 						},
 						title : {
 							text : this.title
+						},
+						subtitle:{
+							text : this.subtitle,
+					        style:{
+					        	color:"red"
+					        }
 						},
 						tooltip : {
 							pointFormat : '{series.name}: <b>{point.percentage:.1f}%</b>'
