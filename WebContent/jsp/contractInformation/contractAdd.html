@@ -91,7 +91,7 @@
 		<tbody>
 			<tr ng-repeat="item in uploader.queue">
 				<td><strong>{{ item.file.name }}</strong></td>
-				<td ng-show="uploader.isHTML5" nowrap>{{
+				<td ng-show="uploader.isHTML5"  nowrap>{{
 					item.file.size/1024/1024|number:2 }} MB</td>
 				<td ng-show="uploader.isHTML5">
 					<div class="progress" style="margin-bottom: 0;">
@@ -114,10 +114,11 @@
 	</table>
 
 	<div class="div-btn">
-		<button type="button" class="btn" ng-click="uploader.uploadAll()"
+		<button type="button" class="btn" ng-click="uploadAll()"
 			ng-disabled="!uploader.getNotUploadedItems().length">全部上传</button>
 		<button type="button" class="btn" ng-click="uploader.clearQueue()"
 			ng-disabled="!uploader.queue.length">全部移除</button>
+		<label style="color:red">&nbsp;&nbsp;&nbsp;&nbsp;注: 一次性文件上传量不超过30M</label>
 	</div>
 </div>
 <!-- 上传文件完 -->

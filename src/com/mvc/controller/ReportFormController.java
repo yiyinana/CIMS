@@ -514,8 +514,6 @@ public class ReportFormController {
 		}
 
 		List<Summary> summaryList = reportFormService.findSummary(date, type, flag);
-		// session.setAttribute(SessionKeyConstants.selectProjectSummaryList,
-		// summaryList);
 		jsonObject = new JSONObject();
 		jsonObject.put("list", summaryList);
 		return jsonObject.toString();
@@ -529,7 +527,6 @@ public class ReportFormController {
 	 */
 	@RequestMapping("/exportProjectSummaryList.do")
 	public ResponseEntity<byte[]> exportProjectSummaryList(HttpServletRequest request, HttpServletResponse response) {
-		String exportFlag = "0";
 		String date = "";// 默认全部
 		Integer type = -1;// 默认全部
 		Integer flag = 0;// 0:合同数量；1：合同规模
@@ -545,12 +542,6 @@ public class ReportFormController {
 			flag = Integer.valueOf(request.getParameter("summaryGoal"));
 		}
 		List<Summary> list = reportFormService.findSummary(date, type, flag);
-		// @SuppressWarnings("unchecked")
-		// List<Summary> list = (List<Summary>)
-		// session.getAttribute(SessionKeyConstants.selectProjectSummaryList);
-		// System.out.println("selectProjectSummaryList:"
-		// + (List<Summary>)
-		// session.getAttribute(SessionKeyConstants.selectProjectSummaryList));
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("summaryList", list);
 		map.put("date", date);
@@ -559,7 +550,7 @@ public class ReportFormController {
 		map.put("path", path);
 
 		ResponseEntity<byte[]> byteww = reportFormService.exportProjectSummary(map);
-		Cookie cookie = new Cookie("exportFlag", exportFlag);
+		Cookie cookie = new Cookie("exportFlag", "1");
 		cookie.setMaxAge(30 * 60);
 		cookie.setPath("/");
 		response.addCookie(cookie);

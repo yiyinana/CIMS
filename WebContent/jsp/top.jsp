@@ -48,7 +48,13 @@
 			<source src="${ctx}/audio/msg.wav"></source>
 		</audio>
 	</header>
-	<section class="containner">		
+	<section class="containner">
+	<!-- 加载模态框 -->
+<div class="overlayer"></div>
+<div class="tipLoading" >
+	<img class="tipimage" src="../images/wait.gif"/><div class="tiptext" >正在加载，请稍后……</div>
+</div>
+<!-- 加载模态框 -->		
 		<script type="text/javascript"
 			src="${ctx}/js/lib/jquery.json-2.2.min.js"></script>
 		<script type="text/javascript">

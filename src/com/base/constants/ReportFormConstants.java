@@ -19,4 +19,10 @@ public class ReportFormConstants {
 
 	// 报表图片路径
 	public static final String PIC_PATH = "/WEB-INF/picture";
+
+	// 文件上传路径
+	public static final String UPLOAD_PATH = "/WEB-INF/upload";
+
+	// 文件下载路径
+	public static final String DOWNLOAD_PATH = "/WEB-INF/download";
 }
