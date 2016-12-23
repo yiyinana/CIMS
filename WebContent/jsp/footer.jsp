@@ -1,3 +1,4 @@
+
 </section>
 <!-- <footer> </footer> -->
 <script type="text/javascript" src="${ctx}/js/lib/jquery-1.9.1.min.js"></script>
@@ -6,6 +7,7 @@
 <!-- AngularJS dependences -->
 <script type="text/javascript" src="${ctx}/js/lib/angular/angular.js"></script>
 <script type="text/javascript" src="${ctx}/js/lib/angular/angular-route.js"></script>
+<script type="text/javascript" src="${ctx}/js/app/exportForm.js"></script>
 <script type="text/javascript">
 	$(function() {
 		//Ã©Â¡Â¶Ã©ÂÂ¨Ã¥Â¯Â¼Ã¨ÂÂªÃ¥ÂÂÃ¦ÂÂ¢

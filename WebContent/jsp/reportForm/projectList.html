@@ -11,7 +11,7 @@
 	<div class="">
 		<div>
 			<form action="exportProjectListBylimits.do" method="post"
-				enctype="multipart/form-data">
+				enctype="multipart/form-data" >
 				<ul class="projectListLimit">
 					<li><label>合同类型</label><select class="dfselect layoutStyle"
 						ng-model="limit.contType" name="contType">
@@ -68,7 +68,7 @@
 							<option value="{{user.user_id}}" ng-repeat="user in users">{{user.user_name}}</option></select></li>
 					<li><input class="btn layoutStyle" style="width: 60px"
 						type="button" value="查询" ng-click="selectProjectListBylimits()"></li>
-					<li><input class="btn layoutStyle" style="width: 60px"
+					<li><input class="btn layoutStyle" style="width: 60px" onclick="setExportFlagCookie()"
 						type="submit" value="导出"></li>
 				</ul>
 
@@ -120,10 +120,6 @@
 		var $distpicker = $('#distpicker');
 		$distpicker.distpicker();
 	});
+	
 </script>
-<!-- 加载模态框 -->
-<div class="overlayer"></div>
-<div class="tipLoading" >
-	<img class="tipimage" src="../images/wait.gif"/><div class="tiptext" >正在加载，请稍后……</div>
-</div>
-<!-- 加载模态框 -->
+

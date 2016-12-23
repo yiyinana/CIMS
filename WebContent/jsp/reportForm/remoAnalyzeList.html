@@ -23,7 +23,7 @@
 			<input id="chart2-svg" name="chart2SVGStr" class="hidden" type="text" />
 			<input id="chart3-svg" name="chart3SVGStr" class="hidden" type="text" />
 			<input id="chart4-svg" name="chart4SVGStr" class="hidden" type="text" />
-			<input class="btn" type="submit" value="导出">
+			<input class="btn" type="submit" onclick="setExportFlagCookie()" value="导出">
 		</form>
 	</div>
 
@@ -121,10 +121,4 @@
 	<div id="pieChart3" style="min-width: 400px; height: 400px;margin-top:80px"></div>
 	<div id="pieChart4" style="min-width: 400px; height: 400px;margin-top:80px"></div>
 </div>
-<!-- 加载模态框 -->
-<div class="overlayer"></div>
-<div class="tipLoading" >
-	<img class="tipimage" src="../images/wait.gif"/><div class="tiptext" >正在加载，请稍后……</div>
-</div>
-<!-- 加载模态框 -->
 

@@ -529,7 +529,6 @@ public class ReportFormController {
 	 */
 	@RequestMapping("/exportProjectSummaryList.do")
 	public ResponseEntity<byte[]> exportProjectSummaryList(HttpServletRequest request, HttpServletResponse response) {
-		String exportFlag = "0";
 		String date = "";// 默认全部
 		Integer type = -1;// 默认全部
 		Integer flag = 0;// 0:合同数量；1：合同规模
@@ -559,7 +558,7 @@ public class ReportFormController {
 		map.put("path", path);
 
 		ResponseEntity<byte[]> byteww = reportFormService.exportProjectSummary(map);
-		Cookie cookie = new Cookie("exportFlag", exportFlag);
+		Cookie cookie = new Cookie("exportFlag", "1");
 		cookie.setMaxAge(30 * 60);
 		cookie.setPath("/");
 		response.addCookie(cookie);
