@@ -8,7 +8,10 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.batik.transcoder.TranscoderException;
@@ -69,7 +72,7 @@ public class ReportFormController {
 	 * @return
 	 */
 	@RequestMapping("/exportProjectListBylimits.do")
-	public ResponseEntity<byte[]> exportProjectStatistic(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportProjectStatistic(HttpServletRequest request, HttpServletResponse response) {
 		Integer cont_type = null;
 		String pro_stage = null;
 		Integer managerId = null;
@@ -116,6 +119,10 @@ public class ReportFormController {
 
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteArr = reportFormService.exportProjectStatistic(map, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteArr;
 	}
 
@@ -152,7 +159,7 @@ public class ReportFormController {
 	 * @return
 	 */
 	@RequestMapping("/exportUnGetContListBylimits.do")
-	public ResponseEntity<byte[]> exportNoBackCont(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportNoBackCont(HttpServletRequest request, HttpServletResponse response) {
 		Integer handler = null;
 		Integer header = null;
 		String province = null;
@@ -184,6 +191,10 @@ public class ReportFormController {
 
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteArr = reportFormService.exportNoBackCont(map, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteArr;
 	}
 
@@ -233,13 +244,15 @@ public class ReportFormController {
 	 * @return
 	 */
 	@RequestMapping("/exportContNumSum.do")
-	public ResponseEntity<byte[]> exportContNumSum(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportContNumSum(HttpServletRequest request, HttpServletResponse response) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
-		// map.put("handler", handler);
-
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteArr = reportFormService.exportContNumSum(map, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteArr;
 	}
 
@@ -279,7 +292,8 @@ public class ReportFormController {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@RequestMapping("/exportWord.do")
-	public ResponseEntity<byte[]> exportWordReport(HttpServletRequest request, HttpSession session) {
+	public ResponseEntity<byte[]> exportWordReport(HttpServletRequest request, HttpSession session,
+			HttpServletResponse response) {
 		String firstDate = (String) session.getAttribute(SessionKeyConstants.BEGIN_YEAR);
 		String secondDate = (String) session.getAttribute(SessionKeyConstants.END_YEAR);
 
@@ -356,6 +370,10 @@ public class ReportFormController {
 			e.printStackTrace();
 		}
 		ResponseEntity<byte[]> byteArr = FileHelper.downloadFile(fileName, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteArr;
 	}
 
@@ -426,7 +444,7 @@ public class ReportFormController {
 	 * @return
 	 */
 	@RequestMapping("/exportSummarySheet.do")
-	public ResponseEntity<byte[]> exportSummarySheet(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportSummarySheet(HttpServletRequest request, HttpServletResponse response) {
 		String date = "";
 
 		if (StringUtil.strIsNotEmpty(request.getParameter("year"))) {
@@ -434,6 +452,10 @@ public class ReportFormController {
 		}
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteww = reportFormService.exportSummarySheet(date, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteww;
 	}
 
@@ -444,7 +466,7 @@ public class ReportFormController {
 	 * @return
 	 */
 	@RequestMapping("/exportSummarySheetList.do")
-	public ResponseEntity<byte[]> exportSummarySheetList(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportSummarySheetList(HttpServletRequest request, HttpServletResponse response) {
 
 		String startTime = "";
 		String endTime = "";
@@ -461,6 +483,10 @@ public class ReportFormController {
 
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteArr = reportFormService.exportSummarySheetList(map, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteArr;
 	}
 
@@ -487,13 +513,9 @@ public class ReportFormController {
 			flag = Integer.valueOf(jsonObject.getString("summaryGoal"));
 		}
 
-		List<Summary> list = reportFormService.findSummary(date, type, flag);
-		for (int i = 0; i < list.size(); i++) {
-			System.out.println("结果集：" + list.get(i).getOrder_num() + "" + list.get(i).getProvince());
-		}
-
+		List<Summary> summaryList = reportFormService.findSummary(date, type, flag);
 		jsonObject = new JSONObject();
-		jsonObject.put("list", list);
+		jsonObject.put("list", summaryList);
 		return jsonObject.toString();
 	}
 
@@ -504,7 +526,7 @@ public class ReportFormController {
 	 * @return
 	 */
 	@RequestMapping("/exportProjectSummaryList.do")
-	public ResponseEntity<byte[]> exportProjectSummaryList(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportProjectSummaryList(HttpServletRequest request, HttpServletResponse response) {
 		String date = "";// 默认全部
 		Integer type = -1;// 默认全部
 		Integer flag = 0;// 0:合同数量；1：合同规模
@@ -520,7 +542,6 @@ public class ReportFormController {
 			flag = Integer.valueOf(request.getParameter("summaryGoal"));
 		}
 		List<Summary> list = reportFormService.findSummary(date, type, flag);
-
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("summaryList", list);
 		map.put("date", date);
@@ -529,6 +550,10 @@ public class ReportFormController {
 		map.put("path", path);
 
 		ResponseEntity<byte[]> byteww = reportFormService.exportProjectSummary(map);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteww;
 	}
 
@@ -575,7 +600,7 @@ public class ReportFormController {
 	 * 导出光伏自营项目催款计划表
 	 */
 	@RequestMapping("/exportPaymentPlanList.do")
-	public ResponseEntity<byte[]> exportPaymentPlanList(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportPaymentPlanList(HttpServletRequest request, HttpServletResponse response) {
 		String province = null;// 行政区域
 		String cont_project = null;// 工程名称 && 项目名称
 		String cont_client = null;// 业主名称 && 业主公司名称
@@ -637,6 +662,10 @@ public class ReportFormController {
 
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteww = reportFormService.exportProvisionPlan(map, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteww;
 	}
 

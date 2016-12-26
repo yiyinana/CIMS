@@ -1704,6 +1704,7 @@ app
 							var uploader = $scope.uploader = new FileUploader({
 								url : '/CIMS/file/upload.do',
 							});
+							var fileSizeNum=0;
 
 							// FILTERS
 
@@ -1716,6 +1717,16 @@ app
 								}
 							});
 
+							$scope.uploadAll=function(){
+								if(fileSizeNum>=31457280){
+									alert("一次性文件上传量不能超过30M");
+									return false;
+								}else{
+									uploader.uploadAll();
+								}
+								
+								
+							}
 							// CALLBACKS
 
 							uploader.onWhenAddingFileFailed = function(
@@ -1725,14 +1736,23 @@ app
 										filter, options);
 							};
 							uploader.onAfterAddingFile = function(fileItem) {
+								fileSizeNum+=fileItem.file.size;
 								console.info('onAfterAddingFile', fileItem);
 							};
 							uploader.onAfterAddingAll = function(addedFileItems) {
+							
 								console
 										.info('onAfterAddingAll',
 												addedFileItems);
 							};
 							uploader.onBeforeUploadItem = function(item) {
+								var a=1;
+								
+								if(a==0){
+									return true;
+								}else{
+									return false;
+								}
 								console.info('onBeforeUploadItem', item);
 							};
 							uploader.onProgressItem = function(fileItem,

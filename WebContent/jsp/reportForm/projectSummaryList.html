@@ -24,8 +24,8 @@
 					</select></li>
 					<li><label>汇总内容</label><select class="dfselect layoutStyle"
 						ng-model="proSumLimit.summaryGoal" name="summaryGoal">
-							<option value="0">数量</option>
-							<option value="1">规模</option>
+							<option value="0">合同数量</option>
+							<option value="1">装机容量</option>
 					</select></li>
 					<li><label>年份</label><input
 						class="dfselect layoutStyle dateFormatForYear" style="width: 63px"
@@ -33,7 +33,7 @@
 						name="year" /><span id="errorText1" class="error-span">格式错误</span></li>
 					<li><input class="btn layoutStyle" style="width: 60px"
 						type="button" value="查询" ng-click="selectProjectSummaryBylimits()"></li>
-					<li><input class="btn layoutStyle" style="width: 60px"
+					<li><input class="btn layoutStyle" style="width: 60px" onclick="setExportFlagCookie()"
 						type="submit" value="导出"></li>
 				</ul>
 
@@ -56,6 +56,9 @@
 			</form>
 		</div>-->
 		<div style="clear: both"></div>
+		<ul style="text-align: right">
+			<li><span>合同数量单位&nbsp;&nbsp;:&nbsp;&nbsp;个&nbsp;&nbsp;;&nbsp;&nbsp;&nbsp;&nbsp;装机容量单位&nbsp;&nbsp;:&nbsp;&nbsp;MW&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
+		</ul>
 	</div>
 	<table class="tablelist" id="summarySheet">
 		<thead>

@@ -41,7 +41,7 @@
 							<option value="{{user.user_id}}" ng-repeat="user in users">{{user.user_name}}</option></select></li>
 					<li><input class="btn layoutStyle" style="width: 60px"
 						type="button" value="查询" ng-click="selectUnGetContListBylimits()"></li>
-					<li><input class="btn layoutStyle" style="width: 60px"
+					<li><input class="btn layoutStyle" style="width: 60px" onclick="setExportFlagCookie()"
 						type="submit" value="导出"></li>
 				</ul>
 
@@ -86,4 +86,3 @@
 		$distpicker.distpicker();
 	});
 </script>
-

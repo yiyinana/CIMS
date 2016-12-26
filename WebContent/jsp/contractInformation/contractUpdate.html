@@ -128,10 +128,12 @@
 	</table>
 
 	<div class="div-btn">
-		<button type="button" class="btn" ng-click="uploader.uploadAll()"
+		<button type="button" class="btn" ng-click="uploadAll()"
 			ng-disabled="!uploader.getNotUploadedItems().length">全部上传</button>
 		<button type="button" class="btn" ng-click="uploader.clearQueue()"
 			ng-disabled="!uploader.queue.length">全部移除</button>
+		<label style="color:red">&nbsp;&nbsp;&nbsp;&nbsp;注: 一次性文件上传量不超过30M</label>
+			
 	</div>
 </div>
 <!-- 上传文件完 -->

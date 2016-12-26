@@ -199,8 +199,6 @@ public class ReportFormServiceImpl implements ReportFormService {
 	private List<ProjectStatisticForm> contToProStatis(Iterator<Contract> it) {
 		List<ProjectStatisticForm> listGoal = new ArrayList<ProjectStatisticForm>();
 		ProjectStatisticForm projectStatisticForm = null;
-		Float totalMoney = 0f;// 总金额
-		Float totalCapa = 0f;// 总装机容量
 		int i = 0;
 		while (it.hasNext()) {// 赋值顺序和表头无关
 			i++;
@@ -218,16 +216,8 @@ public class ReportFormServiceImpl implements ReportFormService {
 			String proStageStr = contract.getPro_stage();// 设计阶段（数字类型字符串）
 			proStageStr = intStrToStr(proStageStr);
 			projectStatisticForm.setPro_stage(proStageStr);// 设计阶段（项目阶段）
-			Float inst_capa = contract.getInstall_capacity();
-			if (inst_capa != null) {
-				totalCapa += inst_capa;
-			}
-			projectStatisticForm.setInstall_capacity(inst_capa);// 装机容量（MW）
-			Float cont_money = contract.getCont_money();
-			if (cont_money != null) {
-				totalMoney += cont_money;
-			}
-			projectStatisticForm.setCont_money(cont_money);// 合同额(万元)
+			projectStatisticForm.setInstall_capacity(contract.getInstall_capacity());// 装机容量（MW）
+			projectStatisticForm.setCont_money(contract.getCont_money());// 合同额(万元)
 
 			String cont_status = null;
 			Integer isOrNo = contract.getCont_initiation();// 是否立项
@@ -249,12 +239,6 @@ public class ReportFormServiceImpl implements ReportFormService {
 			listGoal.add(projectStatisticForm);
 		}
 
-		projectStatisticForm = new ProjectStatisticForm();// 总计
-		projectStatisticForm.setCont_project("总计");
-		projectStatisticForm.setCont_money(totalMoney);
-		projectStatisticForm.setInstall_capacity(totalCapa);
-		listGoal.add(projectStatisticForm);
-
 		return listGoal;
 	}
 
@@ -267,7 +251,6 @@ public class ReportFormServiceImpl implements ReportFormService {
 	private List<NoBackContForm> contToNoBackCont(Iterator<Contract> it) {
 		List<NoBackContForm> listGoal = new ArrayList<NoBackContForm>();
 		NoBackContForm noBackContForm = null;
-		Float totalMoney = 0f;
 		int i = 0;
 		while (it.hasNext()) {// 赋值顺序和表头无关
 			i++;
@@ -276,11 +259,7 @@ public class ReportFormServiceImpl implements ReportFormService {
 			noBackContForm.setNb_id(i);// 序号
 			noBackContForm.setCont_project(contract.getCont_project());// 项目名称
 			noBackContForm.setCont_client(contract.getCont_client());// 业主单位
-			Float cont_money = contract.getCont_money();
-			if (cont_money != null) {
-				totalMoney += cont_money;
-			}
-			noBackContForm.setCont_money(cont_money);// 合同额(万元)
+			noBackContForm.setCont_money(contract.getCont_money());// 合同额(万元)
 			if (contract.getManager() != null) {
 				noBackContForm.setHandler(contract.getManager().getUser_name());// 经手人(设总)
 			}
@@ -291,12 +270,47 @@ public class ReportFormServiceImpl implements ReportFormService {
 			listGoal.add(noBackContForm);
 		}
 
-		noBackContForm = new NoBackContForm();// 总计
+		return listGoal;
+	}
+
+	// 分项统计表总计
+	private ProjectStatisticForm statisSum(Iterator<Contract> itSum) {
+		ProjectStatisticForm projectStatisticForm = new ProjectStatisticForm();// 总计
+		Float totalMoney = 0f;// 总金额
+		Float totalCapa = 0f;// 总装机容量
+		while (itSum.hasNext()) {
+			Contract contract = itSum.next();
+			Float inst_capa = contract.getInstall_capacity();
+			if (inst_capa != null) {
+				totalCapa += inst_capa;
+			}
+			Float cont_money = contract.getCont_money();
+			if (cont_money != null) {
+				totalMoney += cont_money;
+			}
+		}
+
+		projectStatisticForm.setCont_project("总计");
+		projectStatisticForm.setCont_money(totalMoney);
+		projectStatisticForm.setInstall_capacity(totalCapa);
+		return projectStatisticForm;
+	}
+
+	// 未返回合同总计
+	private NoBackContForm noBackSum(Iterator<Contract> itSum) {
+		NoBackContForm noBackContForm = new NoBackContForm();// 总计
+		Float totalMoney = 0f;// 总金额
+		while (itSum.hasNext()) {
+			Contract contract = itSum.next();
+			Float cont_money = contract.getCont_money();
+			if (cont_money != null) {
+				totalMoney += cont_money;
+			}
+		}
+
 		noBackContForm.setCont_project("总计");
 		noBackContForm.setCont_money(totalMoney);
-		listGoal.add(noBackContForm);
-
-		return listGoal;
+		return noBackContForm;
 	}
 
 	// 查询光电院项目分项统计表
@@ -305,6 +319,11 @@ public class ReportFormServiceImpl implements ReportFormService {
 		List<Contract> listSource = contractDao.findContByPara(map, pager);
 		Iterator<Contract> it = listSource.iterator();
 		List<ProjectStatisticForm> listGoal = contToProStatis(it);
+
+		List<Contract> listSum = contractDao.findContByPara(map, null);
+		Iterator<Contract> itSum = listSum.iterator();
+		ProjectStatisticForm projectStatisticForm = statisSum(itSum);// 总计
+		listGoal.add(projectStatisticForm);
 
 		return listGoal;
 	}
@@ -315,6 +334,11 @@ public class ReportFormServiceImpl implements ReportFormService {
 		List<Contract> listSource = contractDao.findContByParaNoBack(map, pager);
 		Iterator<Contract> it = listSource.iterator();
 		List<NoBackContForm> listGoal = contToNoBackCont(it);
+
+		List<Contract> listSum = contractDao.findContByParaNoBack(map, pager);
+		Iterator<Contract> itSum = listSum.iterator();
+		NoBackContForm noBackContForm = noBackSum(itSum);
+		listGoal.add(noBackContForm);
 
 		return listGoal;
 	}
@@ -1038,7 +1062,7 @@ public class ReportFormServiceImpl implements ReportFormService {
 			title.append("(其他)");
 		}
 		if (flag == 0) {
-			title.append("(合同数量)");
+			title.append("(合同数量(个))");
 		} else {
 			title.append("(合同规模(万MV))");
 		}
