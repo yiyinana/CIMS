@@ -236,8 +236,11 @@ app
 										})
 										.success(
 												function(data) {
-													$(".tipLoading").fadeOut(200);
-													$(".overlayer").fadeOut(200);
+													$(".tipLoading").fadeOut(
+															200);
+													$(".overlayer")
+															.fadeOut(200);
+
 													reportForm.prStForms = data.list;// prstForms查询出来的列表（ProjectStatisticForm）
 													pageTurn(data.totalPage, 1);
 													reportForm.plTotalRow = data.totalRow;
@@ -302,8 +305,10 @@ app
 										})
 										.success(
 												function(data) {
-													$(".tipLoading").fadeOut(200);
-													$(".overlayer").fadeOut(200);
+													$(".tipLoading").fadeOut(
+															200);
+													$(".overlayer")
+															.fadeOut(200);
 													// 表1
 													reportForm.comoCompareRemo = data.comoCompareRemo;
 													reportForm.newComoAnalyseList = data.newComoAnalyseList;
@@ -387,8 +392,8 @@ app
 																						/(fill|stroke)="rgba([ 0-9]+,[ 0-9]+,[ 0-9]+),([ 0-9\.]+)"/g,
 																						'$1="rgb($2)" $1-opacity="$3"');
 																	});
-													
-													if (chart1Data.length!=0) {											
+													if (chart1Data.length != 0) {
+
 														var chart1 = new Chart(
 																{
 																	elementId : "#pieChart1",
@@ -396,7 +401,26 @@ app
 																			+ "年自营项目新签合同额分析图",
 																	name : "合同占比",
 																	data : chart1Data,
-																	subtitle:""
+																	subtitle : ""
+																});
+														chart1.init();
+														$('#chart1-svg')
+																.val(
+																		$(
+																				"#pieChart1")
+																				.highcharts()
+																				.getSVG());
+
+													} else {
+														var chart1 = new Chart(
+																{
+																	elementId : "#pieChart1",
+																	title : beginYear
+																			+ "年自营项目新签合同额分析图",
+																	name : "合同占比",
+																	data : null,
+																	subtitle : "没有相关数据"
+
 																});
 														chart1.init();
 															$('#chart1-svg')
@@ -406,25 +430,10 @@ app
 																			.highcharts()
 																			.getSVG());	
 													
-													}else{					
-														var chart1 = new Chart(
-															{
-																elementId : "#pieChart1",
-																title : beginYear
-																		+ "年自营项目新签合同额分析图",
-																name : "合同占比",
-																data : null,
-																subtitle:"没有相关数据"
-															});
-													    chart1.init();
-														$('#chart1-svg')
-														.val(
-																$(
-																		"#pieChart1")
-																		.highcharts()
-																		.getSVG());	
-														}
-													if (chart2Data.length!=0) {
+													}
+											
+													if (chart2Data.length != 0) {
+
 														var chart2 = new Chart(
 																{
 																	elementId : "#pieChart2",
@@ -432,7 +441,7 @@ app
 																			+ "年自营项目新签合同额分析图",
 																	name : "合同占比",
 																	data : chart2Data,
-																	subtitle:""
+																	subtitle : ""
 																});
 														chart2.init();
 														$('#chart2-svg')
@@ -441,7 +450,7 @@ app
 																				"#pieChart2")
 																				.highcharts()
 																				.getSVG());
-													}else{
+													} else {
 														var chart2 = new Chart(
 																{
 																	elementId : "#pieChart2",
@@ -449,7 +458,7 @@ app
 																			+ "年自营项目新签合同额分析图",
 																	name : "合同占比",
 																	data : chart2Data,
-																	subtitle:"没有相关数据"
+																	subtitle : "没有相关数据"
 																});
 														chart2.init();
 														$('#chart2-svg')
@@ -459,6 +468,7 @@ app
 																				.highcharts()
 																				.getSVG());
 													}
+
 													if (chart3Data.length!=0) {
 														var chart3 = new Chart(
 																{
@@ -477,15 +487,15 @@ app
 																				.highcharts()
 																				.getSVG());
 													}else{
+
 														var chart3 = new Chart(
 																{
 																	elementId : "#pieChart3",
 																	title : beginYear
 																			+ "年自营项目到款额分析图",
 																	name : "合同占比",
-																	subTitle:"meiyou shuju ",
 																	data : chart3Data,
-																	subtitle:"没有相关数据"
+																	subtitle : ""
 																});
 														chart3.init();
 														$('#chart3-svg')
@@ -494,9 +504,9 @@ app
 																				"#pieChart3")
 																				.highcharts()
 																				.getSVG());
-														
-													}
-													if (chart4Data.length!=0) {
+
+													} 
+													if (chart4Data.length != 0) {
 														var chart4 = new Chart(
 																{
 																	elementId : "#pieChart4",
@@ -504,7 +514,7 @@ app
 																			+ "年自营项目到款额分析图",
 																	name : "合同占比",
 																	data : chart4Data,
-																	subtitle:""
+																	subtitle : ""
 																});
 														chart4.init();
 														$('#chart4-svg')
@@ -513,7 +523,7 @@ app
 																				"#pieChart4")
 																				.highcharts()
 																				.getSVG());
-													}else{
+													} else{
 														var chart4 = new Chart(
 																{
 																	elementId : "#pieChart4",
@@ -675,8 +685,11 @@ app
 										})
 										.success(
 												function(data) {
-													$(".tipLoading").fadeOut(200);
-													$(".overlayer").fadeOut(200);
+
+													$(".tipLoading").fadeOut(
+															200);
+													$(".overlayer")
+															.fadeOut(200);
 													reportForm.payPlanForms = data.list;// payPlanForms查询出来的列表（PaymentPlanForm）
 													paymentPageTurn(
 															data.totalPage, 1);
@@ -707,8 +720,12 @@ app
 										})
 										.success(
 												function(data) {
-													$(".tipLoading").fadeOut(200);
-													$(".overlayer").fadeOut(200);
+
+													$(".tipLoading").fadeOut(
+															200);
+													$(".overlayer")
+															.fadeOut(200);
+
 													reportForm.payPlanForms = data.list;// payPlanForms查询出来的列表（PaymentPlanForm）
 													reportForm.remo_totalmoney = data.remo_totalmoney;// 累计到款总金额
 													reportForm.invo_totalmoney = data.invo_totalmoney;// 累计开发票总金额
@@ -806,7 +823,6 @@ app
 							reportForm.selectProjectSummaryBylimits = function() {
 								$(".tipLoading").fadeIn(200);
 								$(".overlayer").fadeIn(200);
-
 								var pLimit = JSON
 										.stringify(reportForm.proSumLimit);
 								services.selectProjectSummaryBylimits({
@@ -823,7 +839,17 @@ app
 								});
 
 							};
-						
+							reportForm.changeSelType = function() {
+								if (reportForm.proSumLimit.summaryGoal==1) {
+									$("#capacity").css("display", "block");
+									$("#number").css("display", "none");
+								} else {
+									$("#number").css("display", "block");
+									$("#capacity").css("display", "none");
+									
+								}
+							};
+
 							// 初始化
 							function initData() {
 								console.log("初始化页面信息");
