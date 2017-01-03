@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
+import com.base.constants.ReportFormConstants;
 import com.base.constants.SessionKeyConstants;
 import com.mvc.entity.Contract;
 import com.mvc.entity.Files;
@@ -67,14 +68,14 @@ public class FileController {
 	 */
 	@RequestMapping("/upload.do")
 	public @ResponseBody String upload(HttpServletRequest request, HttpSession session) throws IOException {
-		boolean flag = true;
+		boolean flag = false;
 		// 创建一个通用的多部分解析器
 		CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver(
 				request.getSession().getServletContext());
 		if (multipartResolver.isMultipart(request)) {// 判断是否有文件上传
 			MultipartHttpServletRequest multiRequest = (MultipartHttpServletRequest) request;// 转换成多部分request
 			Iterator<String> iter = multiRequest.getFileNames();// request中的所有文件名
-			String path = request.getSession().getServletContext().getRealPath("/WEB-INF/upload");// 上传服务器的路径
+			String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.UPLOAD_PATH);// 上传服务器的路径
 			createDir(path);
 
 			Date date = null;
@@ -190,7 +191,7 @@ public class FileController {
 		int cont_id = (int) session.getAttribute("cont_id");// 从session中获取cont_id
 		List<Files> list = fileService.findFileByConId(cont_id);
 		// 在服务器端创建打包下载的临时文件
-		String path = request.getSession().getServletContext().getRealPath("/WEB-INF/download");
+		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.DOWNLOAD_PATH);
 		int file_num = list.size();
 		if (file_num == 1) {// 单个文件下载
 			Files fileBean = list.get(0);

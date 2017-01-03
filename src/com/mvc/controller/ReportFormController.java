@@ -8,7 +8,10 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.batik.transcoder.TranscoderException;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.mvc.entity.ProjectStatisticForm;
+import com.mvc.entity.Summary;
 import com.mvc.entity.SummarySheet;
 import com.base.constants.ReportFormConstants;
 import com.base.constants.SessionKeyConstants;
@@ -28,6 +32,7 @@ import com.mvc.entity.NoBackContForm;
 import com.mvc.entity.PaymentPlanListForm;
 import com.mvc.service.ContractService;
 import com.mvc.service.ReportFormService;
+import com.utils.DoubleFloatUtil;
 import com.utils.FileHelper;
 import com.utils.Pager;
 import com.utils.StringUtil;
@@ -67,10 +72,11 @@ public class ReportFormController {
 	 * @return
 	 */
 	@RequestMapping("/exportProjectListBylimits.do")
-	public ResponseEntity<byte[]> exportProjectStatistic(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportProjectStatistic(HttpServletRequest request, HttpServletResponse response) {
 		Integer cont_type = null;
 		String pro_stage = null;
 		Integer managerId = null;
+		Integer headerId = null;
 		Integer cont_status = null;
 		String province = null;
 		String startTime = null;
@@ -85,6 +91,9 @@ public class ReportFormController {
 		if (StringUtil.strIsNotEmpty(request.getParameter("userId"))) {
 			managerId = Integer.valueOf(request.getParameter("userId"));// 设总
 		}
+		if (StringUtil.strIsNotEmpty(request.getParameter("headerId"))) {
+			headerId = Integer.valueOf(request.getParameter("headerId"));// 设总
+		}
 		if (StringUtil.strIsNotEmpty(request.getParameter("contStatus"))) {
 			cont_status = Integer.valueOf(request.getParameter("contStatus"));// 合同状态
 		}
@@ -92,16 +101,17 @@ public class ReportFormController {
 			province = request.getParameter("province");// 省份
 		}
 		if (StringUtil.strIsNotEmpty(request.getParameter("startDate"))) {
-			startTime = request.getParameter("startDate") + "-01";// 开始时间
+			startTime = request.getParameter("startDate");// 开始时间
 		}
 		if (StringUtil.strIsNotEmpty(request.getParameter("endDate"))) {
-			endTime = request.getParameter("endDate") + "-01";// 结束时间
+			endTime = request.getParameter("endDate");// 结束时间
 		}
 
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("cont_type", cont_type);
 		map.put("pro_stage", pro_stage);
 		map.put("managerId", managerId);
+		map.put("headerId", headerId);
 		map.put("cont_status", cont_status);
 		map.put("province", province);
 		map.put("startTime", startTime);
@@ -109,6 +119,10 @@ public class ReportFormController {
 
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteArr = reportFormService.exportProjectStatistic(map, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteArr;
 	}
 
@@ -127,10 +141,14 @@ public class ReportFormController {
 		Pager pager = reportFormService.pagerTotal(map, page);
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		List<ProjectStatisticForm> list = reportFormService.findProjectStatistic(map, pager, path);
+		ProjectStatisticForm sum = list.remove(list.size() - 1);// 获取统计列，并删除
 
 		jsonObject = new JSONObject();
 		jsonObject.put("list", list);
 		jsonObject.put("totalPage", pager.getTotalPage());
+		jsonObject.put("totalRow", pager.getTotalRow());
+		jsonObject.put("totalMoney", sum.getCont_money());
+		jsonObject.put("totalCapacity", sum.getInstall_capacity());
 		return jsonObject.toString();
 	}
 
@@ -141,7 +159,7 @@ public class ReportFormController {
 	 * @return
 	 */
 	@RequestMapping("/exportUnGetContListBylimits.do")
-	public ResponseEntity<byte[]> exportNoBackCont(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportNoBackCont(HttpServletRequest request, HttpServletResponse response) {
 		Integer handler = null;
 		Integer header = null;
 		String province = null;
@@ -158,10 +176,10 @@ public class ReportFormController {
 			province = request.getParameter("province");// 省份
 		}
 		if (StringUtil.strIsNotEmpty(request.getParameter("startDate"))) {
-			startTime = request.getParameter("startDate") + "-01";// 开始时间
+			startTime = request.getParameter("startDate");// 开始时间
 		}
 		if (StringUtil.strIsNotEmpty(request.getParameter("endDate"))) {
-			endTime = request.getParameter("endDate") + "-01";// 结束时间
+			endTime = request.getParameter("endDate");// 结束时间
 		}
 
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -173,6 +191,10 @@ public class ReportFormController {
 
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteArr = reportFormService.exportNoBackCont(map, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteArr;
 	}
 
@@ -191,11 +213,47 @@ public class ReportFormController {
 		Pager pager = reportFormService.pagerTotalNoBack(map, page);
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		List<NoBackContForm> list = reportFormService.findNoBackCont(map, pager, path);
+		NoBackContForm sum = list.remove(list.size() - 1);// 获取统计列，并删除
 
 		jsonObject = new JSONObject();
 		jsonObject.put("list", list);
 		jsonObject.put("totalPage", pager.getTotalPage());
+		jsonObject.put("totalRow", pager.getTotalRow());
+		jsonObject.put("totalMoney", sum.getCont_money());
 		return jsonObject.toString();
+	}
+
+	/**
+	 * 查询统计汇总表（合同数量）
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/selectContNumSum.do")
+	public @ResponseBody String selectContNumSum(HttpServletRequest request) {
+		List<List<String>> list = reportFormService.findContNumSum();
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("list", list);
+		return jsonObject.toString();
+	}
+
+	/**
+	 * 导出统计汇总表（合同数量）
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/exportContNumSum.do")
+	public ResponseEntity<byte[]> exportContNumSum(HttpServletRequest request, HttpServletResponse response) {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
+		ResponseEntity<byte[]> byteArr = reportFormService.exportContNumSum(map, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
+		return byteArr;
 	}
 
 	/*
@@ -234,7 +292,8 @@ public class ReportFormController {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@RequestMapping("/exportWord.do")
-	public ResponseEntity<byte[]> exportWordReport(HttpServletRequest request, HttpSession session) {
+	public ResponseEntity<byte[]> exportWordReport(HttpServletRequest request, HttpSession session,
+			HttpServletResponse response) {
 		String firstDate = (String) session.getAttribute(SessionKeyConstants.BEGIN_YEAR);
 		String secondDate = (String) session.getAttribute(SessionKeyConstants.END_YEAR);
 
@@ -242,8 +301,7 @@ public class ReportFormController {
 		String fileName = "自营项目合同额及到款分析表.docx";// 2007版
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);
 		path = FileHelper.transPath(fileName, path);// 解析后的上传路径
-		String modelPath = request.getSession().getServletContext().getRealPath(ReportFormConstants.WORD_MODEL_PATH);// 模板路径
-
+		String modelPath = request.getSession().getServletContext().getRealPath("word\\" + "template.docx");// 模板路径
 		// 获取表三（到款分析表）的相关数据
 		List<NewRemoAnalyse> newRemoAnalyseList = reportFormService.findRemoByDate(firstDate, secondDate);
 		// 获取表二（合同额分析表）的数据
@@ -312,6 +370,10 @@ public class ReportFormController {
 			e.printStackTrace();
 		}
 		ResponseEntity<byte[]> byteArr = FileHelper.downloadFile(fileName, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteArr;
 	}
 
@@ -382,7 +444,7 @@ public class ReportFormController {
 	 * @return
 	 */
 	@RequestMapping("/exportSummarySheet.do")
-	public ResponseEntity<byte[]> exportSummarySheet(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportSummarySheet(HttpServletRequest request, HttpServletResponse response) {
 		String date = "";
 
 		if (StringUtil.strIsNotEmpty(request.getParameter("year"))) {
@@ -390,6 +452,10 @@ public class ReportFormController {
 		}
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteww = reportFormService.exportSummarySheet(date, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteww;
 	}
 
@@ -400,7 +466,7 @@ public class ReportFormController {
 	 * @return
 	 */
 	@RequestMapping("/exportSummarySheetList.do")
-	public ResponseEntity<byte[]> exportSummarySheetList(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportSummarySheetList(HttpServletRequest request, HttpServletResponse response) {
 
 		String startTime = "";
 		String endTime = "";
@@ -417,7 +483,78 @@ public class ReportFormController {
 
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteArr = reportFormService.exportSummarySheetList(map, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteArr;
+	}
+
+	/**
+	 * 查询光伏项目汇总表
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/selectProjectSummaryList.do")
+	public @ResponseBody String selectSummary(HttpServletRequest request) {
+		String date = "";// 默认全部
+		Integer type = -1;// 默认全部
+		Integer flag = 0;// 0:合同数量；1：合同规模
+		JSONObject jsonObject = JSONObject.fromObject(request.getParameter("limit"));
+
+		if (jsonObject.containsKey("year")) {
+			date = jsonObject.getString("year");
+		}
+		if (jsonObject.containsKey("contType")) {
+			type = Integer.valueOf(jsonObject.getString("contType"));
+		}
+		if (jsonObject.containsKey("summaryGoal")) {
+			flag = Integer.valueOf(jsonObject.getString("summaryGoal"));
+		}
+
+		List<Summary> summaryList = reportFormService.findSummary(date, type, flag);
+		jsonObject = new JSONObject();
+		jsonObject.put("list", summaryList);
+		return jsonObject.toString();
+	}
+
+	/**
+	 * 导出当年光伏项目汇总表
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/exportProjectSummaryList.do")
+	public ResponseEntity<byte[]> exportProjectSummaryList(HttpServletRequest request, HttpServletResponse response) {
+		String date = "";// 默认全部
+		Integer type = -1;// 默认全部
+		Integer flag = 0;// 0:合同数量；1：合同规模
+		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
+
+		if (StringUtil.strIsNotEmpty(request.getParameter("year"))) {
+			date = request.getParameter("year");
+		}
+		if (StringUtil.strIsNotEmpty(request.getParameter("contType"))) {
+			type = Integer.valueOf(request.getParameter("contType"));
+		}
+		if (StringUtil.strIsNotEmpty(request.getParameter("summaryGoal"))) {
+			flag = Integer.valueOf(request.getParameter("summaryGoal"));
+		}
+		List<Summary> list = reportFormService.findSummary(date, type, flag);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("summaryList", list);
+		map.put("date", date);
+		map.put("type", type);
+		map.put("flag", flag);
+		map.put("path", path);
+
+		ResponseEntity<byte[]> byteww = reportFormService.exportProjectSummary(map);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
+		return byteww;
 	}
 
 	/*
@@ -428,6 +565,11 @@ public class ReportFormController {
 	 */
 	@RequestMapping("/selectPaymentPlanList.do")
 	public @ResponseBody String selectPaymentPlanList(HttpServletRequest request) {
+		String totalMoney;
+		String remo_totalmoney;
+		String invo_totalmoney;
+		String invo_not_totalmoney;
+
 		JSONObject jsonObject = JSONObject.fromObject(request.getParameter("limit"));
 		Integer page = Integer.parseInt(request.getParameter("page"));// 分页
 		Map<String, Object> map = reportFormService.JsonObjToMap(jsonObject);
@@ -435,8 +577,20 @@ public class ReportFormController {
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		List<PaymentPlanListForm> list = reportFormService.findPaymentPlanList(map, pager, path);
 
+		List<Object> list0 = reportFormService.findTotalMoney(map);
+		Object[] objOne1 = (Object[]) list0.get(0);
+		totalMoney = objOne1[0].toString();
+		remo_totalmoney = objOne1[1].toString();
+		invo_totalmoney = objOne1[2].toString();
+		invo_not_totalmoney = DoubleFloatUtil.sub(totalMoney, invo_totalmoney);
+
 		jsonObject = new JSONObject();
 		jsonObject.put("list", list);
+		jsonObject.put("totalMoney", totalMoney);
+		jsonObject.put("remo_totalmoney", remo_totalmoney);// 累计到款总金额
+		jsonObject.put("invo_totalmoney", invo_totalmoney);// 累计开发票总金额
+		jsonObject.put("invo_not_totalmoney", invo_not_totalmoney);// 累计未开发票总金额
+		jsonObject.put("totalRow", pager.getTotalRow());// 总记录
 		jsonObject.put("totalPage", pager.getTotalPage());
 		return jsonObject.toString();
 
@@ -446,7 +600,7 @@ public class ReportFormController {
 	 * 导出光伏自营项目催款计划表
 	 */
 	@RequestMapping("/exportPaymentPlanList.do")
-	public ResponseEntity<byte[]> exportPaymentPlanList(HttpServletRequest request) {
+	public ResponseEntity<byte[]> exportPaymentPlanList(HttpServletRequest request, HttpServletResponse response) {
 		String province = null;// 行政区域
 		String cont_project = null;// 工程名称 && 项目名称
 		String cont_client = null;// 业主名称 && 业主公司名称
@@ -508,6 +662,10 @@ public class ReportFormController {
 
 		String path = request.getSession().getServletContext().getRealPath(ReportFormConstants.SAVE_PATH);// 上传服务器的路径
 		ResponseEntity<byte[]> byteww = reportFormService.exportProvisionPlan(map, path);
+		Cookie cookie = new Cookie("exportFlag", "1");
+		cookie.setMaxAge(30 * 60);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 		return byteww;
 	}
 

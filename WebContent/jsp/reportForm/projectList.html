@@ -8,10 +8,10 @@
 
 <div class="rightinfo">
 
-	<div  class="">
+	<div class="">
 		<div>
 			<form action="exportProjectListBylimits.do" method="post"
-				enctype="multipart/form-data">
+				enctype="multipart/form-data" >
 				<ul class="projectListLimit">
 					<li><label>合同类型</label><select class="dfselect layoutStyle"
 						ng-model="limit.contType" name="contType">
@@ -52,39 +52,47 @@
 							</div>
 						</div></li>
 					<li><label>起止年月</label><input
-						class="dfselect layoutStyle dateFormatForYM" style="width: 63px"
-						ng-model="limit.startDate" placeholder="2016-01" id="startDate"
+						class="dfselect layoutStyle dateFormatForYMD" style="width: 80px"
+						ng-model="limit.startDate" placeholder="2016-01-01" id="startDate"
 						name="startDate" /><label>—</label><input
-						class="dfselect layoutStyle dateFormatForYM" style="width: 63px"
-						ng-model="limit.endDate" placeholder="2016-01" id="endDate"
+						class="dfselect layoutStyle dateFormatForYMD" style="width: 80px"
+						ng-model="limit.endDate" placeholder="2016-01-01" id="endDate"
 						name="endDate" /><span id="errorText" class="error-span">格式错误</span></li>
 					<li><label>设总</label><select class="dfselect layoutStyle"
 						style="width: 73px" ng-model="limit.userId" name="userId"><option
 								value="">请选择</option>
 							<option value="{{user.user_id}}" ng-repeat="user in userDepts">{{user.user_name}}</option></select></li>
+					<li><label>主任</label><select class="dfselect layoutStyle"
+						style="width: 73px" ng-model="limit.headerId" name="headerId"><option
+								value="">请选择</option>
+							<option value="{{user.user_id}}" ng-repeat="user in users">{{user.user_name}}</option></select></li>
 					<li><input class="btn layoutStyle" style="width: 60px"
 						type="button" value="查询" ng-click="selectProjectListBylimits()"></li>
-					<li><input class="btn layoutStyle" style="width: 60px"
+					<li><input class="btn layoutStyle" style="width: 60px" onclick="setExportFlagCookie()"
 						type="submit" value="导出"></li>
 				</ul>
 
 			</form>
 		</div>
-
+		<ul style="text-align: left">
+			<li><span>共 {{plTotalRow}} 份合同，合同总金额：{{plTotalMoney
+					|numberFloat}}万元，装机总容量：{{plTotalCapacity |numberFloat}}MW</span></li>
+		</ul>
 	</div>
 	<table class="tablelist">
 		<thead>
 			<tr>
-				<th class="width5">序号</th>
+				<th class="width3">序号</th>
 				<th class="width10">项目名称</th>
-				<th class="width7">所在地</th>
-				<th class="width5">项目设总</th>
-				<th class="width10">项目阶段</th>
-				<th class="width7">装机容量(MW)</th>
+				<th class="width5">区域</th>
 				<th class="width7">合同类型</th>
-				<th class="width10">合同状态</th>
-				<th class="width7">签订时间</th>
-				<th class="width7">合同金额(万元)</th>
+				<th class="width10">项目阶段</th>
+				<th class="width5">合同金额(万元)</th>
+				<th class="width5">装机容量(MW)</th>
+				<th class="width7">合同状态</th>
+				<th class="width5">签订时间</th>
+				<th class="width5">项目设总</th>
+				
 			</tr>
 		</thead>
 		<tbody>
@@ -92,19 +100,19 @@
 				<td>{{$index + 1}}</td>
 				<td>{{psf.cont_project |cutString}}</td>
 				<td>{{psf.province}}</td>
-				<td>{{psf.manager_name}}</td>
-				<td>{{psf.pro_stage }}</td>
-				<td>{{psf.install_capacity |numberFloat}}</td>
 				<td>{{psf.cont_type}}</td>
+				<td>{{psf.pro_stage }}</td>
+				<td>{{psf.cont_money |numberFloat}}</td>
+				<td>{{psf.install_capacity |numberFloat}}</td>
 				<td>{{psf.cont_status}}</td>
 				<td>{{psf.cont_stime.time | dateType}}</td>
-				<td>{{psf.cont_money |numberFloat}}</td>
+				<td>{{psf.manager_name}}</td>
 			</tr>
 		</tbody>
 	</table>
-<label class="error-label" ng-show="listIsShow">对不起，未找到相关数据</label>
+	<label class="error-label" ng-show="listIsShow">对不起，未找到相关数据</label>
 	<div class="tcdPageCode">页码容器</div>
-	
+
 </div>
 
 <script>
@@ -112,5 +120,6 @@
 		var $distpicker = $('#distpicker');
 		$distpicker.distpicker();
 	});
+	
 </script>
 

@@ -31,7 +31,7 @@ public class Contract implements Serializable {
 	private String cont_name;// 合同名称
 	private Integer cont_type;// 合同类型，0：传统光伏项目，1：分布式, 2：光热, 3：其他;
 	private Integer cont_rank;// 等级,用于报警类别的区分,0: 重要，1：一般
-	private Float cont_money;// 合同金额
+	private Float cont_money;// 合同金额 
 	private String cont_pnum;// 项目编码
 	private String cont_onum;// 本公司合同编号
 	private String cont_cnum;// （甲方）业主方编号

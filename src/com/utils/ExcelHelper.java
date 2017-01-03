@@ -15,14 +15,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -49,40 +44,6 @@ import com.mvc.entity.ProjectStatisticForm;
 public class ExcelHelper<T> {
 
 	/**
-	 * 导出2003版单sheet的Excel
-	 * 
-	 * @param headers
-	 * @param list
-	 * @param out
-	 */
-	public void export2003Excel(String title, String[] headers, Collection<T> list, OutputStream out, String pattern) {
-		HSSFWorkbook workbook = new HSSFWorkbook();// 声明一个工作薄
-		export2003Excel(workbook, title, headers, list, pattern);
-		write2003Out(workbook, out);
-	}
-
-	/**
-	 * 导出2003版多sheet的Excel
-	 * 
-	 * @param headers
-	 * @param list
-	 * @param out
-	 * @param pattern
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void export2003MutiExcel(Map<Integer, String> titlesMap, Map<Integer, String[]> headerMap,
-			Map<Integer, List> map, OutputStream out, String pattern) {
-		HSSFWorkbook workbook = new HSSFWorkbook();
-		for (int i = 0; i < map.size(); i++) {
-			Collection<T> list = map.get(i);
-			String[] headers = headerMap.get(i);
-			String title = titlesMap.get(i);
-			export2003Excel(workbook, title, headers, list, pattern);
-		}
-		write2003Out(workbook, out);
-	}
-
-	/**
 	 * 导出2007版单sheet的Excel
 	 * 
 	 * @param title
@@ -91,10 +52,15 @@ public class ExcelHelper<T> {
 	 * @param out
 	 * @param pattern
 	 */
+	@SuppressWarnings("unchecked")
 	public void export2007Excel(String title, String[] headers, Collection<T> list, OutputStream out, String pattern,
 			Integer mergeColumn) {
 		XSSFWorkbook workbook = new XSSFWorkbook();
-		export2007Excel(workbook, title, headers, list, pattern, mergeColumn);
+		if (headers != null) {
+			export2007Excel(workbook, title, headers, list, pattern, mergeColumn);
+		} else {
+			export2007Excel(workbook, title, (List<List<Object>>) list, pattern, mergeColumn);
+		}
 		write2007Out(workbook, out);
 	}
 
@@ -121,139 +87,6 @@ public class ExcelHelper<T> {
 	}
 
 	/**
-	 * 导出2003版Excel
-	 * 
-	 * @param title
-	 *            * 表格标题名 *
-	 * @param headers
-	 *            表格属性列名数组
-	 * @param list
-	 *            需要显示的数据集合,集合中一定要放置符合javabean风格的类的对象。此方法支持的
-	 *            javabean属性的数据类型有基本数据类型及String,Date,byte[](图片数据)
-	 * @param pattern
-	 *            如果有时间数据，设定输出格式。默认为"yyy-MM-dd"
-	 */
-	@SuppressWarnings({ "unchecked", "deprecation", "rawtypes" })
-	private void export2003Excel(HSSFWorkbook workbook, String title, String[] headerSource, Collection<T> list,
-			String pattern) {
-		HSSFSheet sheet = workbook.createSheet(title);
-		// 设置表格默认列宽度为15个字节
-		sheet.setDefaultColumnWidth((short) 15);
-		// 生成一个样式
-		HSSFCellStyle style = workbook.createCellStyle();
-		// 设置这些样式
-		style.setFillForegroundColor(HSSFColor.SKY_BLUE.index);
-		// 生成一个字体
-		HSSFFont font = workbook.createFont();
-		font.setColor(HSSFColor.VIOLET.index);
-		font.setFontHeightInPoints((short) 12);
-		font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-		// 把字体应用到当前的样式
-		style.setFont(font);
-		// 生成并设置另一个样式
-		HSSFCellStyle style2 = workbook.createCellStyle();
-		style2.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
-		// 生成另一个字体
-		HSSFFont font2 = workbook.createFont();
-		font2.setBoldweight(HSSFFont.BOLDWEIGHT_NORMAL);
-		// 把字体应用到当前的样式
-		style2.setFont(font2);
-		// 产生表格标题行
-		HSSFRow row = sheet.createRow(0);
-		Boolean flag = false;
-		String[] headers = hidHeader(headerSource);
-		if (headerSource.length - headers.length > 0) {
-			flag = true;
-		}
-		for (short i = 0; i < headers.length; i++) {
-			HSSFCell cell = row.createCell(i);
-			cell.setCellStyle(style);
-			HSSFRichTextString text = new HSSFRichTextString(headers[i]);
-			cell.setCellValue(text);
-		}
-		// 遍历集合数据，产生数据行
-		Iterator<T> it = list.iterator();
-		int index = 0;
-		while (it.hasNext()) {
-			index++;
-			row = sheet.createRow(index);
-			T t = (T) it.next();
-			// 利用反射，根据javabean属性的先后顺序，动态调用getXxx()方法得到属性值
-			Field[] fieldSource = t.getClass().getDeclaredFields();
-			Field[] fields = null;
-			if (flag) {
-				fields = hidField(fieldSource, t.getClass());
-			} else {
-				fields = fieldSource;
-			}
-			for (short i = 0; i < fields.length; i++) {
-				HSSFCell cell = row.createCell(i);
-				cell.setCellStyle(style2);
-				Field field = fields[i];
-				String fieldName = field.getName();
-				String getMethodName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-				try {
-					Class tCls = t.getClass();
-					Method getMethod = tCls.getMethod(getMethodName, new Class[] {});
-					Object value = getMethod.invoke(t, new Object[] {});
-					// 判断值的类型后进行强制类型转换
-					String textValue = null;
-					if (value instanceof Integer) {
-						int intValue = (Integer) value;
-						cell.setCellValue(intValue);
-					} else if (value instanceof Float) {
-						float fValue = (Float) value;
-						cell.setCellValue(fValue);
-					} else if (value instanceof Double) {
-						double dValue = (Double) value;
-						cell.setCellValue(dValue);
-					} else if (value instanceof Long) {
-						long longValue = (Long) value;
-						cell.setCellValue(longValue);
-					}
-					if (value instanceof Date) {
-						Date date = (Date) value;
-						SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-						textValue = sdf.format(date);
-					} else if (value != null) {
-						// 其它数据类型都当作字符串简单处理
-						textValue = value.toString();
-					} else if (value == null) {
-						textValue = "";
-					}
-					// 如果不是图片数据，就利用正则表达式判断textValue是否全部由数字组成
-					if (textValue != null) {
-						Pattern p = Pattern.compile("^//d+(//.//d+)?$");
-						Matcher matcher = p.matcher(textValue);
-						if (matcher.matches()) {
-							// 是数字当作double处理
-							cell.setCellValue(Double.parseDouble(textValue));
-						} else {
-							HSSFRichTextString richString = new HSSFRichTextString(textValue);
-							HSSFFont font3 = workbook.createFont();
-							font3.setColor(HSSFColor.BLUE.index);
-							richString.applyFont(font3);
-							cell.setCellValue(richString);
-						}
-					}
-				} catch (SecurityException e) {
-					e.printStackTrace();
-				} catch (NoSuchMethodException e) {
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-				} finally {
-					// 清理资源
-				}
-			}
-		}
-	}
-
-	/**
 	 * 导出2007版Excel
 	 * 
 	 * @param title
@@ -274,16 +107,15 @@ public class ExcelHelper<T> {
 		XSSFCellStyle titleStyle = getTitleStyle(workbook);
 		XSSFCellStyle headerStyle = getStyle(workbook, "header");
 		XSSFCellStyle contentStyle = getStyle(workbook, "content");
+		XSSFCellStyle numStyle = getStyle(workbook, "number");
 
 		// 合并单元格，设置表名样式
-		Row titleRow = sheet.createRow(0); // 创建一个行
-		Cell titleCell = titleRow.createCell(0);
+		Cell titleCell = mergeTitle(sheet, headerSource);
 		titleCell.setCellStyle(titleStyle);
 		titleCell.setCellValue(title);
-		sheet.addMergedRegion(new CellRangeAddress(0, 2, 0, headerSource.length-1));// 起始行
-																					// ，结束行，起始列，结束列
+
 		// 产生表格标题行
-		XSSFRow row = sheet.createRow(3);// 从第三行开始生成表格
+		XSSFRow row = sheet.createRow(1);// 从第二行开始生成表格
 		row.setHeight((short) 500);// 行高设置成25px
 
 		Boolean flag = false;
@@ -291,7 +123,7 @@ public class ExcelHelper<T> {
 		if (headerSource.length - headers.length > 0) {
 			flag = true;
 		}
-		for (short i = 0; i < headers.length; i++) {
+		for (int i = 0; i < headers.length; i++) {
 			XSSFCell cell = row.createCell(i);
 			cell.setCellStyle(headerStyle);
 			XSSFRichTextString text = new XSSFRichTextString(headers[i]);
@@ -299,7 +131,7 @@ public class ExcelHelper<T> {
 		}
 		// 遍历集合数据，产生数据行
 		Iterator<T> it = list.iterator();
-		int index = 3;
+		int index = 1;
 		while (it.hasNext()) {
 			index++;
 			row = sheet.createRow(index);
@@ -330,15 +162,16 @@ public class ExcelHelper<T> {
 						cell.setCellValue(intValue);
 					} else if (value instanceof Float) {
 						float fValue = (Float) value;
+						cell.setCellStyle(numStyle);
 						cell.setCellValue(fValue);
 					} else if (value instanceof Double) {
 						double dValue = (Double) value;
+						cell.setCellStyle(numStyle);
 						cell.setCellValue(dValue);
 					} else if (value instanceof Long) {
 						long longValue = (Long) value;
 						cell.setCellValue(longValue);
-					}
-					if (value instanceof Date) {
+					} else if (value instanceof Date) {
 						Date date = (Date) value;
 						SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 						textValue = sdf.format(date);
@@ -378,20 +211,6 @@ public class ExcelHelper<T> {
 		// 第mergeColumn列相同数据合并单元格
 		if (mergeColumn != -1) {
 			addMergedRegion(sheet, mergeColumn, 4, sheet.getLastRowNum(), workbook);// 就是合并第一列的所有相同单元格
-		}
-	}
-
-	/**
-	 * 将输出流写入工作薄(2003版)
-	 * 
-	 * @param workbook
-	 * @param out
-	 */
-	private void write2003Out(HSSFWorkbook workbook, OutputStream out) {
-		try {
-			workbook.write(out);
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -457,9 +276,13 @@ public class ExcelHelper<T> {
 		return arr;
 	}
 
-	// 设置标题样式
+	/**
+	 * 设置标题样式
+	 * 
+	 * @param workbook
+	 * @return
+	 */
 	private XSSFCellStyle getTitleStyle(XSSFWorkbook workbook) {
-
 		XSSFCellStyle style = workbook.createCellStyle();
 
 		style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
@@ -476,9 +299,14 @@ public class ExcelHelper<T> {
 		return style;
 	}
 
-	// 设置表格样式
+	/**
+	 * 设置表格样式
+	 * 
+	 * @param workbook
+	 * @param type
+	 * @return
+	 */
 	private XSSFCellStyle getStyle(XSSFWorkbook workbook, String type) {
-
 		XSSFCellStyle style = workbook.createCellStyle();
 
 		style.setBorderBottom(CellStyle.BORDER_THIN); // 底部边框
@@ -493,8 +321,8 @@ public class ExcelHelper<T> {
 		style.setBorderTop(CellStyle.BORDER_THIN); // 上边边框
 		style.setTopBorderColor(IndexedColors.BLACK.getIndex()); // 上边边框颜色
 
-		style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-		style.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 垂直对齐居中
+		style.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+		style.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直对齐居中
 
 		// 生成另一个字体
 		XSSFFont font = workbook.createFont();
@@ -503,10 +331,13 @@ public class ExcelHelper<T> {
 		switch (type) {
 		case "header":
 			font.setFontHeightInPoints((short) 10); // 设置字体大小
-			font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);// 字体加粗
+			font.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);// 字体加粗
 			break;
 		case "content":
 			font.setFontHeightInPoints((short) 10); // 设置字体大小
+			break;
+		case "number":// 设置单元格为数值类型，避免float精度问题
+			style.setDataFormat(HSSFDataFormat.getBuiltinFormat("0.00"));
 			break;
 		default:
 			break;
@@ -530,11 +361,10 @@ public class ExcelHelper<T> {
 	 */
 	private static void addMergedRegion(XSSFSheet sheet, int cellLine, int startRow, int endRow,
 			XSSFWorkbook workBook) {
-
 		XSSFCellStyle style = workBook.createCellStyle(); // 样式对象
 
-		style.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 垂直
-		style.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 水平
+		style.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);// 垂直
+		style.setAlignment(XSSFCellStyle.ALIGN_CENTER);// 水平
 		// 获取第一行的数据,以便后面进行比较
 		String s_will = sheet.getRow(startRow).getCell(cellLine).getStringCellValue();
 
@@ -550,7 +380,6 @@ public class ExcelHelper<T> {
 				if (flag) {
 					CellRangeAddress cra = new CellRangeAddress(merge_start_row, merge_start_row + count, cellLine,
 							cellLine);
-					System.out.println("起始行=" + merge_start_row + "----终结行=" + (merge_start_row + count));
 					sheet.addMergedRegion(cra);
 				}
 				flag = false;
@@ -566,4 +395,129 @@ public class ExcelHelper<T> {
 			}
 		}
 	}
+
+	/**
+	 * 生成表格名称（只合并单元格，不赋值）
+	 * 
+	 * @param sheet
+	 * @param headerSource
+	 * @return
+	 */
+	private Cell mergeTitle(XSSFSheet sheet, String[] headers) {
+		Row titleRow = sheet.createRow(0); // 创建一个行
+		titleRow.setHeightInPoints(25);
+		Cell titleCell = titleRow.createCell(0);
+		int len = headers.length - 1;
+		for (int i = 0; i < headers.length; i++) {
+			if (headers[i].contains("hidden")) {
+				len--;
+			}
+		}
+		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, len));// 起始行，结束行，起始列，结束列
+		return titleCell;
+	}
+
+	/**
+	 * 导出汇总统计表，List<List<Object>>格式
+	 * 
+	 * @param workbook
+	 * @param title
+	 * @param list
+	 * @param pattern
+	 * @param mergeColumn
+	 */
+	private void export2007Excel(XSSFWorkbook workbook, String title, List<List<Object>> list, String pattern,
+			Integer mergeColumn) {
+		XSSFSheet sheet = workbook.createSheet(title);
+		// 生成样式
+		XSSFCellStyle titleStyle = getTitleStyle(workbook);
+		XSSFCellStyle headerStyle = getStyle(workbook, "header");
+		XSSFCellStyle contentStyle = getStyle(workbook, "content");
+
+		// 合并单元格，设置表名样式
+		List<Object> headerSource = list.get(0);
+		Row titleRow = sheet.createRow(0); // 创建一个行
+		titleRow.setHeightInPoints(25);
+		Cell titleCell = titleRow.createCell(0);
+		int len = headerSource.size();
+		sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, len - 1));// 起始行，结束行，起始列，结束列
+		titleCell.setCellStyle(titleStyle);
+		titleCell.setCellValue(title);
+		list.remove(0);
+
+		// 产生表格标题行（表头）
+		XSSFRow row = sheet.createRow(1);// 从第二行开始生成表格
+		row.setHeight((short) 500);// 行高设置成25px
+		for (int i = 0; i < len; i++) {
+			XSSFCell cell = row.createCell(i);
+			cell.setCellStyle(headerStyle);
+			XSSFRichTextString text = new XSSFRichTextString(headerSource.get(i).toString());
+			cell.setCellValue(text);
+		}
+
+		// 遍历集合数据，产生数据行
+		Iterator<List<Object>> it = list.iterator();
+		int index = 1;
+		while (it.hasNext()) {
+			index++;
+			row = sheet.createRow(index);
+			row.setHeight((short) 400);// 行高设置成25px
+			List<Object> li = (List<Object>) it.next();
+
+			for (int i = 0; i < li.size(); i++) {
+				XSSFCell cell = row.createCell(i);
+				cell.setCellStyle(contentStyle);
+				try {
+					Object value = li.get(i);
+					// 判断值的类型后进行强制类型转换
+					String textValue = null;
+					if (value instanceof Integer) {
+						int intValue = (Integer) value;
+						cell.setCellValue(intValue);
+					} else if (value instanceof Float) {
+						float fValue = (Float) value;
+						cell.setCellValue(fValue);
+					} else if (value instanceof Double) {
+						double dValue = (Double) value;
+						cell.setCellValue(dValue);
+					} else if (value instanceof Long) {
+						long longValue = (Long) value;
+						cell.setCellValue(longValue);
+					} else if (value instanceof Date) {
+						Date date = (Date) value;
+						SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+						textValue = sdf.format(date);
+					} else if (value != null) {
+						// 其它数据类型都当作字符串简单处理
+						textValue = value.toString();
+					} else if (value == null) {
+						textValue = "";
+					}
+					// 如果不是图片数据，就利用正则表达式判断textValue是否全部由数字组成
+					if (textValue != null) {
+						Pattern p = Pattern.compile("^//d+(//.//d+)?$");
+						Matcher matcher = p.matcher(textValue);
+						if (matcher.matches()) {
+							// 是数字当作double处理
+							cell.setCellValue(Double.parseDouble(textValue));
+						} else {
+							XSSFRichTextString richString = new XSSFRichTextString(textValue);
+							cell.setCellValue(richString);
+						}
+					}
+				} catch (SecurityException e) {
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} finally {
+				}
+				sheet.autoSizeColumn((short) i);// 设置自动调整列宽
+			}
+		}
+		// 第mergeColumn列相同数据合并单元格
+		if (mergeColumn != -1) {
+			addMergedRegion(sheet, mergeColumn, 4, sheet.getLastRowNum(), workbook);// 就是合并第一列的所有相同单元格
+		}
+	}
+
 }

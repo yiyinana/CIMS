@@ -204,6 +204,7 @@ public class ContractDaoImpl implements ContractDao {
 	}
 
 	/***** 报表相关 *****/
+	/*************** 王睿 方法起始 *******************/
 	// 光电院项目分项统计表
 	@SuppressWarnings("unchecked")
 	@Override
@@ -211,6 +212,7 @@ public class ContractDaoImpl implements ContractDao {
 		Integer cont_type = (Integer) map.get("cont_type");
 		String pro_stage = (String) map.get("pro_stage");
 		Integer managerId = (Integer) map.get("managerId");
+		Integer headerId = (Integer) map.get("headerId");
 		Integer cont_status = (Integer) map.get("cont_status");
 		String province = (String) map.get("province");
 		String startTime = (String) map.get("startTime");
@@ -237,6 +239,9 @@ public class ContractDaoImpl implements ContractDao {
 		}
 		if (managerId != null) {
 			sql.append(" and c.manager_id=" + managerId);
+		}
+		if (headerId != null) {
+			sql.append(" and c.creator_id=" + headerId);
 		}
 		if (cont_status != null) {
 			switch (cont_status) {
@@ -318,6 +323,7 @@ public class ContractDaoImpl implements ContractDao {
 		Integer cont_type = (Integer) map.get("cont_type");
 		String pro_stage = (String) map.get("pro_stage");
 		Integer managerId = (Integer) map.get("managerId");
+		Integer headerId = (Integer) map.get("headerId");
 		Integer cont_status = (Integer) map.get("cont_status");
 		String province = (String) map.get("province");
 		String startTime = (String) map.get("startTime");
@@ -337,6 +343,9 @@ public class ContractDaoImpl implements ContractDao {
 		}
 		if (managerId != null) {
 			sql.append(" and c.manager_id=" + managerId);
+		}
+		if (headerId != null) {
+			sql.append(" and c.creator_id=" + headerId);
 		}
 		if (cont_status != null) {
 			switch (cont_status) {
@@ -365,6 +374,60 @@ public class ContractDaoImpl implements ContractDao {
 		em.close();
 		return totalRow.longValue();
 	}
+
+	// 动态获取Sql语句（年份sum语句）
+	@Override
+	public String findYearsSql() {
+		EntityManager em = emf.createEntityManager();
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT GROUP_CONCAT(DISTINCT CONCAT('sum(case when DATE_FORMAT(cont_stime,\"%Y\")=''',");
+		sql.append("DATE_FORMAT(cont_stime,\"%Y\"),''' then 1 else 0 end) as ''',DATE_FORMAT(cont_stime,\"%Y\"),'''')");
+		sql.append("  order by cont_stime) FROM contract where cont_ishistory=0");
+		Query query = em.createNativeQuery(sql.toString());
+		String str = (String) query.getSingleResult();
+		em.close();
+		return str;
+	}
+
+	// 动态获取所有年份
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Object> findYears() {
+		EntityManager em = emf.createEntityManager();
+		StringBuilder sql = new StringBuilder();
+		sql.append(
+				"select DATE_FORMAT(cont_stime,\"%Y\") from contract where cont_stime is not null and cont_ishistory=0");
+		sql.append(" group by DATE_FORMAT(cont_stime,\"%Y\") ");
+		Query query = em.createNativeQuery(sql.toString());
+		List<Object> result = query.getResultList();
+		em.close();
+		return result;
+	}
+
+	// 统计汇总表（合同数量）
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Object> findContNumSum(List<String> sqllist, String yearsStr) {
+		EntityManager em = emf.createEntityManager();
+		StringBuilder sql = new StringBuilder();
+		sql.append("select p.province '区域'," + yearsStr + " from");
+		sql.append("(select province from contract where cont_ishistory=0 group by province) as p");
+		sql.append(" left join (select province," + sqllist.get(0));
+		sql.append(" from contract where cont_type=0 and cont_ishistory=0 group by province) as aa");
+		sql.append(" on p.province=aa.province left join (select province," + sqllist.get(1));
+		sql.append(" from contract where cont_type=1 and cont_ishistory=0 group by province) as bb");
+		sql.append(" on p.province=bb.province left join (select province," + sqllist.get(2));
+		sql.append(" from contract where cont_type=2 and cont_ishistory=0 group by province) as cc");
+		sql.append(" on p.province=cc.province left join (select province," + sqllist.get(3));
+		sql.append(" from contract where cont_type=3 and cont_ishistory=0 group by province) as dd");
+		sql.append(" on p.province=dd.province");
+		Query query = em.createNativeQuery(sql.toString());
+		List<Object> result = query.getResultList();
+		em.close();
+		return result;
+	}
+
+	/*************** 王睿 方法终止 *******************/
 
 	// 查询未返回合同统计表总条数
 	@Override
@@ -652,5 +715,81 @@ public class ContractDaoImpl implements ContractDao {
 		Double totalRow = (Double) query.getSingleResult();
 		em.close();
 		return totalRow.floatValue();
+	}
+
+	// 查询合同总金额,累计总金额,已开发票总金额,未开发票总金额
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Object> findTotalMoney(Map<String, Object> map) {
+		String province = (String) map.get("province");// 行政区域
+		String startTime = (String) map.get("startTime");
+		String endTime = (String) map.get("endTime");
+
+		EntityManager em = emf.createEntityManager();
+		StringBuilder sql = new StringBuilder();
+		sql.append("select coalesce(sum(cont_money),0) cont_money,coalesce(sum(remo_totalmoney),0) remo_totalmoney,"
+				+ "coalesce(sum(invo_totalmoney),0) invo_totalmoney from contract c where c.cont_ishistory=0 ");
+		if (province != null) {
+			sql.append(" and c.province='" + province + "'");
+		}
+		if (startTime != null && endTime != null) {
+			sql.append(" and c.cont_stime between '" + startTime + "'" + " and '" + endTime + "'");
+		}
+		Query query = em.createNativeQuery(sql.toString());
+		List<Object> list = query.getResultList();
+		em.close();
+		return list;
+	}
+
+	// 查询光伏项目汇总结果
+	public List<Object> findSummary(String date, Integer contType, Integer flag) {
+		EntityManager em = emf.createEntityManager();
+		StringBuilder sql = new StringBuilder();
+		String summaryType = " count(*)";
+		if (flag == 1) {
+			summaryType = " coalesce(sum(install_capacity),0)";
+		}
+		String stage = " substring_index(substring_index(pro_stage, ',', -2), ',', 1)";
+
+		sql.append(
+				"select p.province ,aa1.stage1num ,aa2.stage2num ,aa3.stage3num ,aa4.stage4num ,aa5.stage5num ,aa6.stage6num ,aa7.stage7num ,aa8.stage8num ,aa9.stage9num ");
+		sql.append("from (select province from contract where cont_ishistory=0 ");
+		if (contType != -1) {
+			sql.append(" and cont_type=" + contType + "");
+		}
+		if (!date.equals("")) {
+			sql.append(" and cont_stime like '%" + date + "%' ");
+		}
+		if (flag == 1) {
+			sql.append("  and pro_stage!='' ");
+		} else {
+			sql.append("  and install_capacity!='' ");
+		}
+		sql.append(" group by province) as p");
+
+		for (int i = 0; i < 9; i++) {
+			String stageNum = " stage" + String.valueOf(i + 1) + "num";
+			String name = "aa" + String.valueOf(i + 1);
+			sql.append(" left join (select province," + summaryType + stageNum
+					+ " from contract where cont_ishistory=0 and " + stage + "=" + i);
+			if (contType != -1) {
+				sql.append(" and cont_type=" + contType + "");
+			}
+			if (!date.equals("")) {
+				sql.append(" and cont_stime like '%" + date + "%' ");
+			}
+			if (flag == 1) {
+				sql.append("  and pro_stage!='' ");
+			} else {
+				sql.append("  and install_capacity!='' ");
+			}
+			sql.append(" group by province) as " + name + " on p.province=" + name + ".province ");
+		}
+		System.out.println("sql:" + sql);
+		Query query = em.createNativeQuery(sql.toString());
+		@SuppressWarnings("unchecked")
+		List<Object> list = query.getResultList();
+		em.close();
+		return list;
 	}
 }

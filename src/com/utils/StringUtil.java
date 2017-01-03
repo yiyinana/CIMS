@@ -36,4 +36,18 @@ public class StringUtil {
 		}
 		return result;
 	}
+
+	/**
+	 * 判断对象为空或者为0
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public static Boolean isNullOrZero(Object obj) {
+		Boolean flag = false;
+		if (obj == null || obj.toString().equals("0")) {
+			flag = true;
+		}
+		return flag;
+	}
 }
