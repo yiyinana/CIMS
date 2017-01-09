@@ -22,8 +22,7 @@
 							<option value="2">光热</option>
 							<option value="3">其他</option>
 					</select></li>
-					<li><label>汇总内容</label><select class="dfselect layoutStyle"
-						ng-model="proSumLimit.summaryGoal" name="summaryGoal">
+					<li><label>汇总内容</label><select class="dfselect layoutStyle" ng-model="proSumLimit.summaryGoal" name="summaryGoal" ng-change="changeSelType()">
 							<option value="0">合同数量</option>
 							<option value="1">装机容量</option>
 					</select></li>
@@ -57,7 +56,8 @@
 		</div>-->
 		<div style="clear: both"></div>
 		<ul style="text-align: right">
-			<li><span>合同数量单位&nbsp;&nbsp;:&nbsp;&nbsp;个&nbsp;&nbsp;;&nbsp;&nbsp;&nbsp;&nbsp;装机容量单位&nbsp;&nbsp;:&nbsp;&nbsp;MW&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
+			<li><span id="number">合同数量单位&nbsp;&nbsp;:&nbsp;&nbsp;个&nbsp;&nbsp;;&nbsp;&nbsp;&nbsp;&nbsp;</span><span id="capacity" style="display:none">装机容量单位&nbsp;&nbsp;:&nbsp;&nbsp;MW&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
+
 		</ul>
 	</div>
 	<table class="tablelist" id="summarySheet">
