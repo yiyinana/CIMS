@@ -201,7 +201,7 @@ app
 							var searchKey = null;
 
 							// 换页
-							function pageTurn(totalPage, page) {
+							function pageTurn(totalPage, page, Func) {
 
 								var $pages = $(".tcdPageCode");
 								if ($pages.length != 0) {
@@ -209,11 +209,12 @@ app
 										pageCount : totalPage,
 										current : page,
 										backFn : function(p) {
-											getDepartmentListByPage(p)
+											Func(p);
 										}
 									});
 								}
 							}
+
 							// 根据页数获取用户列表
 							function getUserListByPage(page) {
 								services.getUserListByPage({
@@ -223,7 +224,7 @@ app
 									user.users = data.list;
 								});
 							}
-							// 功能模块权限字段名
+							// 功能模块权限字段名根据页数
 							var perName = [ "con_per", "task_per", "bill_per",
 									"system_per", "index_per", "left_per" ];
 							// 初始化权限数据容器
@@ -631,7 +632,7 @@ app
 									searchKey : searchKey
 								}).success(function(data) {
 									user.users = data.list;
-									pageTurn(data.totalPage, 1)
+									pageTurn(data.totalPage, 1, getUserListByPage)
 								});
 							};
 							function findRoleFromCookie() {
@@ -677,7 +678,7 @@ app
 										searchKey : searchKey
 									}).success(function(data) {
 										user.users = data.list;
-										pageTurn(data.totalPage, 1)
+										pageTurn(data.totalPage, 1, getUserListByPage)
 									});
 								} else if ($location.path().indexOf('/userAdd') == 0) {
 									getAllDepartmentList();
@@ -690,7 +691,7 @@ app
 										page : 1
 									}).success(function(data) {
 										user.roles = data.list;
-										pageTurn(data.totalPage, 1)
+										pageTurn(data.totalPage, 1, getRoleListByPage)
 									});
 								}
 							}

@@ -2,6 +2,7 @@
 <<<<<<<=HEAD
 >>>>>>>=1d9b269c8e1e774fc8bd99560361d9755d5a08d1
 eclipse.preferences.version=1
+encoding//WebContent/jsp/alarmInformation/alarmList.html=UTF-8
 encoding//WebContent/jsp/billInformation/contractInfo.html=UTF-8
 encoding//WebContent/jsp/billInformation/contractList.html=UTF-8
 encoding//WebContent/jsp/billInformation/invoiceDetail.html=UTF-8

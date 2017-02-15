@@ -273,8 +273,6 @@ alarmApp.controller('AlarmController', [
 				$(".tip").fadeIn(200);
 				$("#addAlarm-form").slideDown(200);
 				$("#editAlarm-form").hide();
-				$("#addTitle").slideDown(200);
-				$("#editTitle").hide();
 			};
 			// 点击修改时弹出模态框
 			alarm.edit = function(obj) {
@@ -295,8 +293,6 @@ alarmApp.controller('AlarmController', [
 				$(".tip").fadeIn(200);
 				$("#addAlarm-form").hide();
 				$("#editAlarm-form").slideDown(200);
-				$("#addTitle").hide();
-				$("#editTitle").slideDown(200);
 				return false;
 			};
 			// 修改报警设置
