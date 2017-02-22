@@ -53,6 +53,7 @@ public class UserController {
 		List<User> list = userService.findUserAllByPage(searchKey, pager.getOffset(), pager.getLimit());
 		jsonObject.put("list", list);
 		jsonObject.put("totalPage", pager.getTotalPage());
+		System.out.println("totalPage:" + pager.getTotalPage());
 		return jsonObject.toString();
 	}
 
@@ -115,7 +116,7 @@ public class UserController {
 		user.setRole(role);
 		user.setUser_isdelete(0);
 		boolean result;
-		
+
 		if (jsonObject.containsKey("user_id")) {
 			user.setUser_id(Integer.valueOf(jsonObject.getString("user_id")));
 			result = userService.save(user);// 修改用户信息

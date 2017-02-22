@@ -113,7 +113,7 @@
 <div class="overlayer"></div>
 <div class="tip" id="tipRemoAudit" style="height: 450px">
 	<div class="tiptop">
-		<span>核对到款信息</span><a></a>
+		<span>创建任务</span><a></a>
 	</div>
 	<div class="invorkInfo-div">
 		<fieldset>
@@ -155,7 +155,7 @@
 			<ul class="forminfo">
 				<li><label>应到款金额：</label>{{receiveMoney.remo_money | receFloat}}&nbsp;&nbsp;万元</li>
 				<li><label>实到款金额：</label>{{receiveMoney.remo_amoney | receFloat}}&nbsp;&nbsp;万元</li>
-				<li><label>到款时间：</label>{{receiveMoney.remo_time | dateType}}</li>
+				<li><label>到款时间：</label>{{receiveMoney.remo_time.time | dateType}}</li>
 				<li><label>核对人：</label>{{receiveMoney.operater.user_name}}</li>
 				<li><div class="remark-div">备注：{{receiveMoney.remo_remark}}</div></li>
 			</ul>
